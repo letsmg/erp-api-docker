@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -61,11 +62,15 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'name' => 'required|string|max:255',            
+            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'access_level' => 'required|integer',
             'is_active' => 'required|boolean',
             'password' => ['nullable', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
+        ],[
+            // Personalização aqui:
+            'email.unique' => 'Este e-mail já está sendo utilizado por outro usuário.',
+            'email.required' => 'O campo e-mail é obrigatório.',
         ]);
 
         if ($request->filled('password')) {

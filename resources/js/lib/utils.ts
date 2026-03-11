@@ -13,8 +13,11 @@ export const fillFormData = (form: any) => {
     const fakeData: Record<string, any> = {
         name: () => "Usuário de Teste " + Math.floor(Math.random() * 100),
         company_name: () => "Empresa Teste " + Math.random().toString(36).substring(7).toUpperCase(),
-        email: () => `teste_${Math.random().toString(36).substring(5)}@zenite.com`,
-        cnpj: () => "00.000.000/0001-91",
+        email: () => `teste_${Math.random().toString(36).substring(5)}@zenite.com`,        
+        cnpj: () => {
+            const suffix = Math.floor(Math.random() * 9000) + 1000; // Gera 4 dígitos aleatórios
+            return `00.000.000/0001-${suffix.toString().substring(0, 2)}`;
+        },
         state_registration: () => "ISENTO",
         zip_code: () => "01001-000",
         address: () => "Rua de Teste, " + Math.floor(Math.random() * 999),
