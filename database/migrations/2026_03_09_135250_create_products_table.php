@@ -8,28 +8,28 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('cascade');
+            $table->foreignId('supplier_id')->constrained()->onDelete('cascade');
             $table->string('description', 150);
-            $table->string('brand', 100);
-            $table->string('model', 100);
-            $table->string('size', 10);
-            $table->string('collection', 50);
-            $table->string('gender', 20);
-            $table->decimal('cost_price', 10, 2);
-            $table->decimal('sale_price', 10, 2);
-            $table->string('barcode', 50);
-            $table->integer('stock_quantity');
-            $table->boolean('is_active')->default(true);
+            $table->string('brand', 100)->nullable();
+            $table->string('model', 100)->nullable();
+            $table->string('size', 20)->nullable();
+            $table->string('collection', 100)->nullable();
+            $table->string('gender', 30)->nullable();                        
             
-            // Campos de Vitrine e SEO (Item 2 do seu pedido)
-            $table->string('slug')->unique(); // URL amigável ex: /produto/tenis-nike-air
-            $table->string('seo_title')->nullable();
-            $table->text('seo_keywords')->nullable();
-            $table->text('seo_description')->nullable();
-            
-            // Fotos (Simplificando conforme seu SQL)
-            $table->json('images')->nullable(); 
+            // Preços e Promoção
+            $table->decimal('cost_price', 12, 2);
+            $table->decimal('sale_price', 12, 2);
+            $table->decimal('promo_price', 12, 2)->nullable();
+            $table->dateTime('promo_start_at')->nullable();
+            $table->dateTime('promo_end_at')->nullable();
 
+            $table->string('barcode', 50)->nullable()->unique();
+            $table->integer('stock_quantity')->default(0);
+            $table->boolean('is_active')->default(true);
+            $table->boolean('is_featured')->default(false);
+
+            $table->string('slug')->unique();
+            $table->json('images')->nullable(); 
             $table->timestamps();
         });
     }

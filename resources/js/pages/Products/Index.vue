@@ -10,10 +10,14 @@ defineProps({ products: Array });
     <AuthenticatedLayout>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">Gerenciamento de Produtos</h2>
-            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700">
+            
+            <Link 
+                :href="route('products.create')" 
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition"
+            >
                 <PackagePlus class="w-5 h-5" />
                 Novo Produto
-            </button>
+            </Link>
         </div>
 
         <div class="bg-white rounded-xl shadow overflow-hidden">

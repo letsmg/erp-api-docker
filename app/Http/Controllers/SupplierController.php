@@ -9,9 +9,6 @@ use Illuminate\Validation\Rule;
 
 class SupplierController extends Controller
 {
-    /**
-     * Exibe a lista de fornecedores
-     */
     public function index()
     {
         return Inertia::render('Suppliers/Index', [
@@ -19,17 +16,11 @@ class SupplierController extends Controller
         ]);
     }
 
-    /**
-     * Exibe o formulário de criação
-     */
     public function create()
     {
         return Inertia::render('Suppliers/Create');
     }
 
-    /**
-     * Salva o novo fornecedor no banco
-     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -45,10 +36,11 @@ class SupplierController extends Controller
             'contact_name_2'     => 'nullable|string|max:100',
             'phone_2'            => 'nullable|string|max:20',
         ], [
-            'company_name.required'       => 'A Razão Social é obrigatória.',
-            'cnpj.required'               => 'O CNPJ é obrigatório.',
-            'cnpj.unique'                 => 'Este CNPJ já está cadastrado.',
-            'state_registration.required' => 'A Inscrição Estadual é obrigatória.',
+            'company_name.required' => 'A Razão Social é obrigatória.',
+            'cnpj.required'         => 'O CNPJ é obrigatório.',
+            'cnpj.unique'           => 'Este CNPJ já está cadastrado.',
+            'zip_code.required'      => 'O CEP é obrigatório.',
+            'contact_name_1.required' => 'O nome do contato principal é obrigatório.',
         ]);
 
         Supplier::create($data);
@@ -57,9 +49,6 @@ class SupplierController extends Controller
             ->with('message', 'Fornecedor cadastrado com sucesso!');
     }
 
-    /**
-     * Exibe o formulário de edição
-     */
     public function edit(Supplier $supplier)
     {
         return Inertia::render('Suppliers/Edit', [
@@ -67,9 +56,6 @@ class SupplierController extends Controller
         ]);
     }
 
-    /**
-     * Atualiza os dados do fornecedor
-     */
     public function update(Request $request, Supplier $supplier)
     {
         $data = $request->validate([
@@ -100,13 +86,9 @@ class SupplierController extends Controller
             ->with('message', 'Fornecedor atualizado com sucesso!');
     }
 
-    /**
-     * Exclui um fornecedor
-     */
     public function destroy(Supplier $supplier)
     {
         $supplier->delete();
-
         return redirect()->route('suppliers.index')
             ->with('message', 'Fornecedor removido com sucesso!');
     }

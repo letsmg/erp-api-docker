@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         // O método call recebe um array com as classes que você deseja executar
         $this->call([
             SingleUserSeeder::class,
-            // SupplierSeeder::class,
+            SupplierSeeder::class,
             // ProductSeeder::class,
             // UserSeeder::class,            
         ]);

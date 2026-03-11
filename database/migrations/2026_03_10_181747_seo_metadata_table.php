@@ -13,16 +13,11 @@ return new class extends Migration
     {
         Schema::create('seo_metadata', function (Blueprint $table) {
             $table->id();
-            
-            // As colunas 'seoable_id' e 'seoable_type' que permitem a polimorfia
-            // indexable() e nullable() garantem que funcione para páginas avulsas
-            $table->nullableMorphs('seoable'); 
-
-            $table->string('slug')->unique(); // ex: 'promocao-natal-2026'
-            $table->string('title')->nullable();
-            $table->text('description')->nullable();
-            $table->string('keywords')->nullable();
-            
+            $table->morphs('seoable'); // Cria seoable_id e seoable_type
+            $table->string('meta_title', 70)->nullable();
+            $table->string('meta_description', 160)->nullable();
+            $table->string('meta_keywords')->nullable();
+            $table->string('canonical_url')->nullable();
             $table->timestamps();
         });
     }

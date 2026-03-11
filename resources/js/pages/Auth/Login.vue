@@ -9,7 +9,7 @@ defineProps({ errors: Object });
 // Inicializa o formulário do Inertia
 const form = useForm({
     email: '1@1.com',
-    password: 'SenhaNovaSite*',
+    password: '[SenhaNova2026]',
     remember: false,
 });
 

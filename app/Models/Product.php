@@ -4,54 +4,56 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Str;
 
 class Product extends Model
 {
-    // Campos que podem ser preenchidos em massa
-        protected $fillable = [
-        'supplier_id',
-        'description',
-        'brand',
-        'model',
-        'size',
-        'collection',
-        'gender',
-        'cost_price',
-        'sale_price',
-        'barcode',
-        'stock_quantity',
-        'is_active',
-        'slug',     
+    protected $fillable = [
+        'supplier_id', 'description', 'brand', 'model', 'size', 
+        'collection', 'gender', 'cost_price', 'sale_price', 
+        'promo_price', 'promo_start_at', 'promo_end_at',
+        'barcode', 'stock_quantity', 'is_active', 'is_featured',
+        'slug', 'images'
     ];
 
-    /**
-     * Relacionamento: Um produto pertence a um fornecedor.
-     */
+    protected $casts = [
+        'is_active' => 'boolean',
+        'is_featured' => 'boolean',
+        'images' => 'json',
+        'promo_start_at' => 'datetime',
+        'promo_end_at' => 'datetime',
+    ];
+
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
     }
 
     /**
-     * Boot function do Model.
-     * Usada para executar lógica automaticamente em eventos do Eloquent.
+     * Relacionamento Polimórfico de SEO
      */
+    public function seo(): MorphOne
+    {
+        return $this->morphOne(SeoMetadata::class, 'seoable');
+    }
+
     protected static function boot()
     {
         parent::boot();
-
-        // Antes de criar um produto, gera o SLUG para a URL da vitrine
-        static::creating(function ($product) {
-            if (empty($product->slug)) {
-                $product->slug = Str::slug($product->description) . '-' . uniqid();
-            }
-        });
+        static::creating(fn ($product) => 
+            $product->slug = $product->slug ?? Str::slug($product->description) . '-' . Str::random(5)
+        );
     }
 
-    public function seo()
+    public function getCurrentPriceAttribute()
     {
-        // Um produto tem um SEO (polimórfico)
-        return $this->morphOne(SeoMetadata::class, 'seoable');
+        $now = now();
+        if ($this->promo_price && $this->promo_start_at && $this->promo_end_at) {
+            if ($now->between($this->promo_start_at, $this->promo_end_at)) {
+                return $this->promo_price;
+            }
+        }
+        return $this->sale_price;
     }
 }
