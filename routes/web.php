@@ -37,8 +37,7 @@ Route::middleware(['auth'])->group(function () {
 
         //altera outros usuarios entre ativo e inativo, mas não pode alterar o status do proprio usuario
         Route::patch('/users/{user}/toggle', [UserController::class, 'toggleStatus'])->name('users.toggle');
-
-        Route::resource('suppliers', SupplierController::class);
+        
     });
 
 });
