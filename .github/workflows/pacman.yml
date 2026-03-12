@@ -32,9 +32,9 @@ jobs:
           --username letsmg \
           --output pacman-contribution-graph.svg
 
-      - name: Deploy to output branch
+      - name: Deploy to main branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: output
+          publish_branch: main
           publish_dir: .
