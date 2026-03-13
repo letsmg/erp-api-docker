@@ -59,9 +59,10 @@ export const fillFormData = (form: any, suppliers: any[] = []) => {
     const ufs = ['SP', 'RJ', 'MG', 'PR', 'SC', 'RS', 'BA', 'GO', 'CE', 'PE'];
 
     const fakeData: Record<string, any> = {
+        // ... (mantenha os campos de fornecedor e básicos iguais)
         company_name: () => "Empresa Teste " + Math.random().toString(36).substring(7).toUpperCase(),
         email: () => `teste_${Math.random().toString(36).substring(5)}@zenite.com`,        
-        cnpj: () => "42.123.456/0001-99", // Exemplo fixo válido
+        cnpj: () => "42.123.456/0001-99",
         state_registration: () => "ISENTO",
         zip_code: () => "01001-000",
         address: () => "Rua de Teste, " + Math.floor(Math.random() * 999),
@@ -70,10 +71,8 @@ export const fillFormData = (form: any, suppliers: any[] = []) => {
         state: () => ufs[Math.floor(Math.random() * ufs.length)],
         contact_name_1: () => "Contato Principal",
         phone_1: () => "(11) 98888-7777",
-        contact_name_2: () => "Contato Secundário",
-        phone_2: () => "(11) 4002-8922",
-        is_active: () => true,
-        // ... restante dos campos de produtos
+        
+        // Produtos
         description: () => "Tênis Performance Turbo " + Math.floor(Math.random() * 1000),
         brand: () => "Nike",
         model: () => "Air Max 2026",
@@ -92,9 +91,20 @@ export const fillFormData = (form: any, suppliers: any[] = []) => {
             return date.toISOString().slice(0, 16);
         },
         is_featured: () => Math.random() > 0.5,
-        meta_title: () => "Tênis Nike Air Max 2026 - Oferta Especial",
-        meta_description: () => "O melhor tênis para corrida...",
         supplier_id: () => (suppliers && suppliers.length > 0) ? suppliers[0].id : '',
+
+        // --- NOVOS CAMPOS DE SEO E MARKETING ---
+        meta_title: () => "Tênis Nike Air Max 2026 - Oferta Especial",
+        meta_description: () => "Compre o novo Air Max 2026 com tecnologia de amortecimento turbo. Frete grátis para todo o Brasil.",
+        meta_keywords: () => "tênis nike, air max 2026, corrida, esportes",
+        canonical_url: () => "https://sualoja.com.br/produtos/tenis-nike-2026",
+        h1: () => "Tênis Nike Air Max 2026 Original",
+        h2: () => "O máximo em performance e estilo",
+        text1: () => "Desenvolvido para atletas que buscam quebrar recordes.",
+        text2: () => "Garantia de 12 meses direto com o fabricante.",
+        schema_markup: () => '{"@context": "https://schema.org", "@type": "Product", "name": "Nike Air Max"}',
+        google_tag_manager: () => "\n<script>(function(w,d,s,l,i){w[l]=w[l]||[];})(window,document,'script','dataLayer','GTM-XXXX');</script>",
+        ads: () => "AW-123456789"
     };
 
     Object.keys(form.data()).forEach((key) => {
