@@ -1,4 +1,5 @@
 <script setup>
+import { onMounted, onUnmounted } from 'vue'; // Importações necessárias para o timer
 import { Head, Link } from '@inertiajs/vue3';
 import { useStoreIndex } from './useStoreIndex';
 import { Search, SlidersHorizontal, ShoppingBag, ChevronLeft, ChevronRight, Tag, Percent } from 'lucide-vue-next';
@@ -13,14 +14,46 @@ const props = defineProps({
 
 const { search, minPrice, maxPrice, brand } = useStoreIndex(props);
 
-// Função para controlar o scroll dos carrosséis via botões
+// Variável para armazenar o intervalo do timer
+let timer = null;
+
+// Função de scroll melhorada com lógica de "Loop"
 const scroll = (id, direction) => {
     const el = document.getElementById(id);
     if (el) {
-        const offset = direction === 'left' ? -450 : 450;
-        el.scrollBy({ left: offset, behavior: 'smooth' });
+        const isAtEnd = el.scrollLeft + el.offsetWidth >= el.scrollWidth - 10;
+        
+        if (direction === 'right' && isAtEnd) {
+            // Se estiver no fim e for para a direita, volta ao início
+            el.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+            // Caso contrário, faz o scroll normal
+            const offset = direction === 'left' ? -el.offsetWidth : el.offsetWidth;
+            el.scrollBy({ left: offset, behavior: 'smooth' });
+        }
     }
 };
+
+// Funções para controlar o Autoplay
+const startAutoplay = () => {
+    stopAutoplay(); // Garante que não existam dois timers rodando
+    timer = setInterval(() => {
+        scroll('hero-carousel', 'right');
+    }, 7000); // 5000ms = 5 segundos
+};
+
+const stopAutoplay = () => {
+    if (timer) clearInterval(timer);
+};
+
+// Ciclo de vida do componente
+onMounted(() => {
+    startAutoplay();
+});
+
+onUnmounted(() => {
+    stopAutoplay();
+});
 </script>
 
 <template>
