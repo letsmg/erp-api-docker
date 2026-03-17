@@ -87,8 +87,8 @@ jobs:
         #     DB_USERNAME: test_user
         #     DB_PASSWORD: test_pass
 
-      - name: Build Vite
-        run: npm run build
+      # - name: Build Vite
+      #   run: npm run build
 
       - name: Run Tests
         #run: php artisan test
