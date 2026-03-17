@@ -23,20 +23,22 @@ jobs:
     #       --health-timeout=5s
     #       --health-retries=3
     # services:
-        
-    postgres:
+
+    services:
+      postgres:
         image: postgres:15
         env:
-        POSTGRES_DB: test_db
-        POSTGRES_USER: test_user
-        POSTGRES_PASSWORD: test_pass
+          POSTGRES_DB: test_db
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
         ports:
-        - 5432:5432
+        - 5432:5432            
         options: >-
-        --health-cmd="pg_isready -U test_user"
-        --health-interval=10s
-        --health-timeout=5s
-        --health-retries=5
+          --health-cmd=pg_isready -U test_user
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    
 
     steps:
       - uses: actions/checkout@v4
@@ -81,7 +83,7 @@ jobs:
             DB_DATABASE: test_db
             DB_USERNAME: test_user
             DB_PASSWORD: test_pass
-            
+
       - name: Build Vite
         run: npm run build
 
