@@ -19,7 +19,7 @@
     </source>
     <php>
         <env name="VITE_ENABLED" value="false"/>
-        <env name="APP_ENV" value="testing"/>
+        <env name="APP_KEY" value="base64:uP69vsh6pA7hG0nU3vS0M0J6vU6vM6vU6vM6vU6vM6v="/>        <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
