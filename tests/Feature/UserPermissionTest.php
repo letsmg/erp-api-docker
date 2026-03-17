@@ -67,11 +67,17 @@ class UserPermissionTest extends TestCase
         $novoUsuario = [
             'name' => 'Clone',
             'email' => 'clone@teste.com',
-            'password' => '12345678',
+            'password' => 'password123',
+            'password_confirmation' => 'password123', // Adicione a confirmação!
             'access_level' => 0
         ];
 
         $response = $this->actingAs($admin)->post(route('users.store'), $novoUsuario);
+
+        // Se houver erro de validação, isso vai mostrar o que aconteceu no terminal:
+        if ($response->status() !== 302) {
+            dump($response->json() ?? 'Erro de validação ou permissão');
+        }
 
         $response->assertRedirect();
         $this->assertDatabaseHas('users', ['email' => 'clone@teste.com']);
