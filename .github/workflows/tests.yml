@@ -91,7 +91,8 @@ jobs:
         run: npm run build
 
       - name: Run Tests
-        run: php artisan test
+        #run: php artisan test
+        run: vendor/bin/phpunit --configuration phpunit.xml
         env:
           # Forçamos o uso do SQLite em memória para garantir que os testes passem sem precisar de um servidor DB externo
           DB_CONNECTION: sqlite
