@@ -3,7 +3,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { 
     LayoutDashboard, Users, Package, Truck, 
     LogOut, CheckCircle2, X, AlertTriangle ,
-    FileBarChart
+    FileBarChart, Cloud
 } from 'lucide-vue-next';
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 
@@ -114,6 +114,30 @@ const isUrl = (url) => page.url === url || page.url.startsWith(url + '/');
                 <span class="font-bold text-sm">Gerar Relatórios</span>
             </Link>
 
+            <div class="px-4 mb-4">
+                <a 
+                    href="https://whatismyipaddress.com/ip/147.15.80.52" 
+                    target="_blank" 
+                    class="group relative flex flex-col p-4 rounded-2xl bg-gradient-to-br from-orange-600 to-red-700 hover:from-orange-500 hover:to-red-600 transition-all duration-300 shadow-lg shadow-orange-900/20 overflow-hidden"
+                >
+                    <div class="absolute -right-2 -top-2 w-16 h-16 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+                    
+                    <div class="flex items-center gap-2 mb-2">
+                        <Cloud class="w-4 h-4 text-white animate-pulse" />
+                        <span class="text-[10px] font-black uppercase tracking-[0.1em] text-orange-100">Infraestrutura</span>
+                    </div>
+                    
+                    <p class="text-xs font-bold text-white leading-tight">
+                        Rodando em Oracle Cloud
+                    </p>
+                    
+                    <div class="mt-3 flex items-center text-[10px] font-bold text-white/80 group-hover:text-white transition-colors">
+                        <span>Clique para conferir o IP</span>
+                        <span class="ml-1 group-hover:translate-x-1 transition-transform">→</span>
+                    </div>
+                </a>
+            </div>
+
             <div class="p-4 border-t border-slate-900 bg-slate-950/50">
                 <Link :href="route('logout')" method="post" as="button" class="flex items-center space-x-3 p-3 w-full text-slate-500 hover:text-red-400 hover:bg-red-500/5 rounded-xl transition-all text-left group cursor-pointer font-bold text-sm">
                     <LogOut class="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -121,6 +145,8 @@ const isUrl = (url) => page.url === url || page.url.startsWith(url + '/');
                 </Link>
             </div>
         </aside>
+
+       
 
         <div class="flex-1 flex flex-col md:ml-64">
             <header class="bg-white/80 backdrop-blur-md h-16 flex items-center justify-between px-8 sticky top-0 z-10 border-b border-gray-100">

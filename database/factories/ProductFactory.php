@@ -3,14 +3,17 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Bezhanov\Faker\Provider\Commerce;
 
 class ProductFactory extends Factory
 {
+    
+
     public function definition(): array
     {
         return [
             // Usando sentence (uma frase curta) ou words (palavras soltas)
-            'description'    => ucfirst($this->faker->words(3, true)), 
+            'description'    => ucfirst($this->faker->catchPhrase()), 
             'brand'          => $this->faker->company(),
             'model'          => $this->faker->bothify('??-###'), // Ex: AB-123
             'size'           => $this->faker->randomElement(['P', 'M', 'G', 'GG', '42', '44']),
