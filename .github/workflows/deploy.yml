@@ -48,10 +48,18 @@ jobs:
       - name: 🚀 Executar deploy no servidor
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@147.15.80.52 << 'EOF'
-            set -e # Para o script se qualquer comando falhar
+            set -e
+            
+            # 1. Resolve o erro de segurança do Git
+            echo "🛡️ Configurando exceção de segurança do Git"
+            git config --global --add safe.directory /var/www/erp
+
             cd /var/www/erp
             
             echo "📥 Atualizando código..."
+            # Garante que o usuário ubuntu seja dono temporariamente para o git pull não falhar
+            sudo chown -R ubuntu:ubuntu /var/www/erp
+            
             git reset --hard
             git pull origin main
 
@@ -69,7 +77,7 @@ jobs:
             echo "🗄️ Migrations..."
             php artisan migrate --force
 
-            echo "🔐 Permissões..."
+            echo "🔐 Restaurando permissões de produção..."
             sudo chown -R www-data:www-data /var/www/erp
             sudo chmod -R 775 storage bootstrap/cache
 
