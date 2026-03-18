@@ -1,24 +1,24 @@
-name: 🎨 Code Quality
+# name: 🎨 Code Quality
 
-on:
-  push:
-    branches: [main]
-  pull_request:
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
 
-jobs:
-  quality:
-    runs-on: ubuntu-latest
+# jobs:
+#   quality:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
+#       - name: Setup PHP
+#         uses: shivammathur/setup-php@v2
+#         with:
+#           php-version: '8.3'
 
-      - name: Install PHP deps
-        run: composer install --no-interaction --no-progress
+#       - name: Install PHP deps
+#         run: composer install --no-interaction --no-progress
 
-      - name: Run Pint
-        run: ./vendor/bin/pint --test || true
+#       - name: Run Pint
+#         run: ./vendor/bin/pint --test || true

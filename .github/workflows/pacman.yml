@@ -1,52 +1,52 @@
-name: Generate Contribution Animations
+# name: Generate Contribution Animations
 
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: "0 */12 * * *"
+# on:
+#   workflow_dispatch:
+#   schedule:
+#     - cron: "0 */12 * * *"
 
-permissions:
-  contents: write
+# permissions:
+#   contents: write
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
 
-      # 🐍 Snake
-      - name: Generate snake
-        uses: Platane/snk@v3
-        with:
-          github_user_name: letsmg
-          outputs: |
-            snake.svg
-            snake-dark.svg?palette=github-dark
+#       # 🐍 Snake
+#       - name: Generate snake
+#         uses: Platane/snk@v3
+#         with:
+#           github_user_name: letsmg
+#           outputs: |
+#             snake.svg
+#             snake-dark.svg?palette=github-dark
 
-      # 👾 Pacman
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+#       # 👾 Pacman
+#       - name: Setup Node
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
 
-      - name: Install pacman generator
-        run: npm install pacman-contribution-graph
+#       - name: Install pacman generator
+#         run: npm install pacman-contribution-graph
 
-      - name: Generate pacman
-        run: |
-          npx pacman-contribution-graph \
-          --platform github \
-          --gameTheme github-dark \
-          --username letsmg \
-          --output pacman-contribution-graph.svg
+#       - name: Generate pacman
+#         run: |
+#           npx pacman-contribution-graph \
+#           --platform github \
+#           --gameTheme github-dark \
+#           --username letsmg \
+#           --output pacman-contribution-graph.svg
 
-      # 💾 Commit direto na main
-      - name: Commit files
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add snake.svg snake-dark.svg pacman-contribution-graph.svg
-          git commit -m "update contribution animations" || echo "no changes"
-          git push
+#       # 💾 Commit direto na main
+#       - name: Commit files
+#         run: |
+#           git config --global user.name "github-actions"
+#           git config --global user.email "github-actions@github.com"
+#           git add snake.svg snake-dark.svg pacman-contribution-graph.svg
+#           git commit -m "update contribution animations" || echo "no changes"
+#           git push
