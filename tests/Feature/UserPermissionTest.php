@@ -76,7 +76,12 @@ class UserPermissionTest extends TestCase
         $outroUsuario = User::factory()->create(['access_level' => 0]);
 
         $response = $this->actingAs($user)->patch(route('users.reset', $outroUsuario));
-        $response->assertStatus(200);
+
+        // Verifica que houve redirect (302)
+        $response->assertRedirect();
+
+        // Verifica que a mensagem de sucesso foi enviada na sessão
+        $response->assertSessionHas('message', 'Senha resetada para: Mudar@123');
     }
 
     public function test_admin_pode_cadastrar_usuario()
