@@ -12,38 +12,28 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
-    /**
-     * O modelo que esta factory cria.
-     *
-     * @var string
-     */
     protected $model = User::class;
 
-    /**
-     * Senha padrão usada pela factory.
-     */
     protected static ?string $password;
 
     /**
      * Define o estado padrão do modelo.
-     *
-     * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(), // <- usa $this->faker corretamente
+            'name' => $this->faker->name(),           // Faker sempre assim
             'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('Mudar@123'), // padrão do seu projeto
+            'password' => static::$password ??= Hash::make('Mudar@123'),
             'remember_token' => Str::random(10),
-            'access_level' => 0, // padrão é 0
-            'is_active' => true,  // ativo por padrão
+            'access_level' => 0,
+            'is_active' => true,
         ];
     }
 
     /**
-     * Indica que o email do usuário não foi verificado.
+     * Email não verificado.
      */
     public function unverified(): static
     {
@@ -53,7 +43,7 @@ class UserFactory extends Factory
     }
 
     /**
-     * Permite criar usuário admin (nível 1) facilmente.
+     * Usuário admin.
      */
     public function admin(): static
     {
@@ -63,7 +53,7 @@ class UserFactory extends Factory
     }
 
     /**
-     * Permite criar usuário inativo facilmente.
+     * Usuário inativo.
      */
     public function inactive(): static
     {
