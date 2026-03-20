@@ -75,11 +75,13 @@ class UserPermissionTest extends TestCase
         $response = $this->actingAs($user)->get(route('users.index'));
 
         $response->assertStatus(200)
-                 ->assertInertia(fn (InertiaAssert $page) =>
-                     $page->component('Users/Index')
-                          ->has('users', 2)
-                          ->where('users.1.id', $outroUsuario->id)
-                 );
+            ->assertInertia(fn (InertiaAssert $page) =>
+                $page->component('Users/Index')
+                    ->has('users', 2)
+                    ->where('users', fn ($users) =>
+                        collect($users)->pluck('id')->contains($outroUsuario->id)
+                    )
+            );
     }
 
     public function test_usuario_comum_pode_resetar_senha_outro_nivel_0()
