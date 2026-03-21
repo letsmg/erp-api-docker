@@ -3,6 +3,14 @@ name: 🚀 Deploy
 on:
   push:
     branches: [main]
+   
+#quando usar em producao, aguardar testes primeiro
+# on: 
+#   workflow_run:
+#     workflows: ["🚀 CI tests"] # Deve ser o nome exato do outro arquivo
+#     types:
+#       - completed
+#     branches: [main]        
 
 jobs:
   deploy:    
@@ -40,7 +48,7 @@ jobs:
             php artisan view:cache
             
             echo "🗄️ Migrations..."
-            php artisan migrate --force --seed
+            php artisan migrate:fresh --seed
 
             echo "🔐 Restaurando permissões de produção..."
             sudo chown -R www-data:www-data /var/www/erp

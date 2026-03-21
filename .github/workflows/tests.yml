@@ -4,14 +4,6 @@ on:
   push:
     branches: [main]
 
-#quando usar em producao, aguardar testes primeiro
-# on: 
-#   workflow_run:
-#     workflows: ["🚀 CI tests"] # Deve ser o nome exato do outro arquivo
-#     types:
-#       - completed
-#     branches: [main]    
-
 jobs:
   test:
     runs-on: ubuntu-latest
