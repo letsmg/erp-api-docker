@@ -32,6 +32,14 @@ const submit = () => {
 <template>
     <div class="min-h-screen flex items-center justify-center bg-slate-900 px-4 font-sans text-gray-900">
         <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+
+            <div class="mb-6 flex justify-center">
+                <Link href="/" class="inline-flex items-center text-xs font-bold text-gray-400 hover:text-blue-600 transition group">
+                    <ArrowLeft class="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
+                    VOLTAR PARA A VITRINE / BACK TO STORE
+                </Link>
+            </div>
+            
             <div class="text-center mb-8">
                 <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">ERP Zenite</h2>
                 <p class="text-sm text-gray-500 mt-2">Identificação de acesso protegida</p>
