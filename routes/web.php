@@ -10,6 +10,7 @@ use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+
 // 1. VITRINE (Pública para todos)
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
@@ -17,7 +18,7 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 // 2. AUTENTICAÇÃO (Apenas para quem não está logado)
 Route::middleware('guest')->group(function () {
     Route::get('/', [StoreController::class, 'index'])->name('store.index');
-    Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
+    Route::get('/login', [LoginController::class, 'showLogin'])->name('login');    
     Route::post('/login', [LoginController::class, 'login'])->name('login.post');
     // Esqueci Senha
     Route::get('/forgot-password', [LoginController::class, 'showForgotPassword'])->name('password.request');

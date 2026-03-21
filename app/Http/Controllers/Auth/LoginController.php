@@ -20,9 +20,13 @@ class LoginController extends Controller
         $this->service = $service;
     }
 
+    // Unificamos showLogin e showLoginForm aqui
     public function showLogin()
     {
-        return Inertia::render('Auth/Login');
+        return Inertia::render('Auth/Login', [
+            'userIp' => request()->ip(),
+            'status' => session('status'),
+        ]);
     }
 
     public function showRegister()
@@ -43,20 +47,9 @@ class LoginController extends Controller
         ]);
     }
 
-    public function register(RegisterRequest $request): RedirectResponse
-    {
-        $data = $request->validated();
-
-        $this->service->register($data);
-
-        return redirect()->route('login')
-            ->with('success', 'Cadastro realizado!');
-    }
-
     public function logout(Request $request): RedirectResponse
     {
         $this->service->logout($request);
-
         return redirect('/');
     }
 
@@ -71,7 +64,6 @@ class LoginController extends Controller
 
         try {
             $this->service->sendResetLink($data['email']);
-
             return back()->with('success', 'Link enviado com sucesso!');
         } catch (\Exception $e) {
             return back()->withErrors([
@@ -79,11 +71,6 @@ class LoginController extends Controller
             ]);
         }
     }
-
-    public function showLoginForm()
-    {
-        return inertia('Auth/Login', [
-            'userIp' => request()->ip()
-        ]);
-    }
+    
+    // Remova o método showLoginForm() duplicado se ele existir no final do arquivo
 }
