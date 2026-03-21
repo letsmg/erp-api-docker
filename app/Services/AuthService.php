@@ -27,7 +27,7 @@ class AuthService
         }
 
         try {
-            // Consulta a API com timeout de 2 segundos para não atrasar a experiência do usuário
+            // Consulta a API com timeout de 2 segundos
             $response = Http::timeout(2)->get("http://ip-api.com/json/{$ip}?fields=status,countryCode,message");
 
             if ($response->successful() && $response->json('status') === 'success') {
@@ -35,39 +35,50 @@ class AuthService
 
                 // BLOQUEIO: Se o país não for Brasil (BR), impede o acesso
                 if ($countryCode !== 'BR') {
-                    // Logamos a tentativa suspeita para segurança do administrador
-                    logger()->warning("Tentativa de login bloqueada por geolocalização", [
+                    logger()->warning("Tentativa de login bloqueada: IP estrangeiro detectado", [
                         'ip' => $ip,
-                        'pais_detectado' => $countryCode,
-                        'email_tentativa' => request('email')
+                        'pais' => $countryCode,
+                        'email' => request('email')
                     ]);
 
                     throw ValidationException::withMessages([
-                        'email' => ['Acesso negado: Este sistema não aceita logins originados fora do Brasil por razões de segurança.'],
+                        'email' => [
+                            'Acesso negado: Este sistema não aceita logins originados fora do Brasil por razões de segurança.',
+                            'Access denied: This system only accepts logins from Brazil for security reasons.'
+                        ],
                     ]);
                 }
             }
         } catch (\Exception $e) {
-            // Se a API de GeoIP falhar, registramos o erro no log interno,
-            // mas deixamos o usuário tentar o login para não derrubar o sistema por erro de terceiros.
+            // Falha na API: loga o erro mas permite tentativa para não travar o sistema
             logger()->error("Falha no serviço de verificação de IP: " . $e->getMessage());
         }
     }
 
     /**
-     * Realiza o processo de login com dupla verificação (Geográfica + Credenciais)
+     * Realiza o processo de login com dupla verificação e registro de IP
      */
     public function login(array $credentials, $remember = false)
     {
-        // 1. Verifica se o IP é do Brasil antes de qualquer coisa
+        // 1. Verifica se o IP é do Brasil
         $this->validateGeographicAccess();
 
-        // 2. Se passou na geolocalização, verifica as credenciais no banco
-        return Auth::attempt([
+        // 2. Tenta autenticar
+        $attempt = Auth::attempt([
             'email' => $credentials['email'],
             'password' => $credentials['password'],
             'is_active' => true
         ], $remember);
+
+        // 3. Se logou com sucesso, atualiza o campo last_login_ip no banco
+        if ($attempt) {
+            $user = Auth::user();
+            $user->update([
+                'last_login_ip' => request()->ip()
+            ]);
+        }
+
+        return $attempt;
     }
 
     public function register(array $data)

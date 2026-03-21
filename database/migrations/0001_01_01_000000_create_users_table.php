@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('password');
             $table->integer('access_level')->default(0); 
             $table->boolean('is_active')->default(true); 
+            // Campo para registrar o último IP de login (suporta IPv4 e IPv6)
+            $table->string('last_login_ip', 45)->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
