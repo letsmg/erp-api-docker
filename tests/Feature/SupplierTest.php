@@ -22,12 +22,18 @@ class SupplierTest extends TestCase
 
     public function test_usuario_logado_pode_ver_lista_de_fornecedores()
     {
-        $user = User::factory()->create();
+        // 1. Crie o usuário com o nível de acesso que seu sistema exige
+        // Se o seu sistema pede nível 1, mude para: ['access_level' => 1]
+        $user = User::factory()->create(); 
 
         $response = $this->actingAs($user)->get(route('suppliers.index'));
 
-        // Substituímos o assertStatus simples pelo assertInertia
-        // Isso impede que o Laravel procure o manifest do Vite
+        // 2. ADICIONE ISSO TEMPORARIAMENTE para ver o erro real no console se falhar
+        // $response->dump(); 
+
+        // 3. Verifique o status antes do Inertia
+        $response->assertStatus(200);
+
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Suppliers/Index')
         );
