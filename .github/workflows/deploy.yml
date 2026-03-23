@@ -52,12 +52,11 @@ jobs:
             php artisan view:cache
             
             #para refazer o storage link
-            rm -rf public/storage && php artisan storage:link
-            php artisan storage:link  
-            
+            rm -rf public/storage && php artisan storage:link            
+
             echo "🗄️ Migrations..."
             #php artisan migrate:fresh --seed
-            php artisan migrate:force
+            php artisan migrate --force
 
             echo "🔐 Restaurando permissões de produção..."
             sudo chown -R www-data:www-data /var/www/erp
