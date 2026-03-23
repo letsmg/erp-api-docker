@@ -29,7 +29,7 @@ class SupplierTest extends TestCase
         $response = $this->actingAs($user)->get(route('suppliers.index'));
 
         // 2. ADICIONE ISSO TEMPORARIAMENTE para ver o erro real no console se falhar
-        // $response->dump(); 
+        $response->dump(); 
 
         // 3. Verifique o status antes do Inertia
         $response->assertStatus(200);
