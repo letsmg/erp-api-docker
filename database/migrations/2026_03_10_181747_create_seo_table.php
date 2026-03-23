@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('seo_metadata', function (Blueprint $table) {
+        Schema::create('seo', function (Blueprint $table) {
             $table->id();
             $table->morphs('seoable'); // Cria seoable_id e seoable_type
             //conceito de poliformismo.. gera dois campos seoable_type e seoable_id
@@ -39,6 +39,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('seo_metadata');
+        Schema::dropIfExists('seo');
     }
 };

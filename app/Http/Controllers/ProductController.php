@@ -20,7 +20,7 @@ class ProductController extends Controller
         return Inertia::render('Products/Index', [
             'products' => Product::with(['supplier:id,company_name', 'images'])
                 ->latest()
-                ->get()
+                ->get(),
         ]);
     }
 
@@ -48,7 +48,7 @@ class ProductController extends Controller
             }
 
             // Sincronizar SEO (Só cria se tiver algo preenchido)
-            $this->syncSeoMetadata($product, $request);
+            $this->syncSeo($product, $request);
 
             return redirect()->route('products.index')
                 ->with('message', 'Produto cadastrado com sucesso! Pendente de ativação.');
@@ -90,7 +90,7 @@ class ProductController extends Controller
             $product->update($data);
 
             // 4. Sincronizar SEO
-            $this->syncSeoMetadata($product, $request);
+            $this->syncSeo($product, $request);
 
             return redirect()->route('products.index')->with('message', 'Produto atualizado!');
         });
@@ -153,7 +153,7 @@ class ProductController extends Controller
         }
     }
 
-    private function syncSeoMetadata($product, $request)
+    private function syncSeo($product, $request)
     {
         $seoFields = [
             'meta_title', 'meta_description', 'meta_keywords', 'canonical_url', 

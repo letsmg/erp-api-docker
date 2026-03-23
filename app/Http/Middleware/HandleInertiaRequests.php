@@ -43,6 +43,16 @@ class HandleInertiaRequests extends Middleware
                 'message' => fn () => $request->session()->get('message'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            // Adicionando o SEO Global da Loja com Cache de 1 hora (3600 segundos)
+            'store_seo' => cache()->remember('store_seo', 3600, function () {
+                // Ajuste o Model e a query conforme sua estrutura de tabela
+                return \App\Models\Seo::where('seoable_type', 'App\Models\Store')->first() ?? [
+                    'title' => "ERP Vue Laravel",
+                    'description' => "Site de portfólio representando um e-commerce construído com Laravel e Vue.js.",
+                    'keywords' => "developer php, laravel, vuejs",
+                    'h1' => "ERP Vue Laravel"
+                ];
+            }),
         ]);
     }
 }

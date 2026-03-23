@@ -44,7 +44,7 @@ class Product extends Model
 
     public function seo(): MorphOne
     {
-        return $this->morphOne(SeoMetadata::class, 'seoable');
+        return $this->morphOne(Seo::class, 'seoable');
     }
 
     protected static function boot()
