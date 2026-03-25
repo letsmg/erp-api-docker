@@ -52,8 +52,7 @@ class StoreProductRequest extends FormRequest
             'h2'                => 'nullable|string',
             'text2'             => 'nullable|string',
             'schema_markup'     => 'nullable|string',
-            'google_tag_manager'=> 'nullable|string',
-            'ads'               => 'nullable|string',
+            'google_tag_manager'=> 'nullable|string',            
             
             // Imagens
             'images'          => 'required|array|min:1|max:6',

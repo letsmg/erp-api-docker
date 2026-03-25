@@ -43,8 +43,7 @@ export function useProductEdit(props) {
         free_shipping: Boolean(props.product.free_shipping),
 
         // --- SEO & Marketing ---
-        google_tag_manager: props.product.seo?.google_tag_manager || '',
-        ads: props.product.seo?.ads || '',
+        google_tag_manager: props.product.seo?.google_tag_manager || '',        
         canonical_url: props.product.seo?.canonical_url || '',
         meta_title: props.product.seo?.meta_title || props.product.seo_display?.meta_title || '',
         meta_description: props.product.seo?.meta_description || props.product.seo_display?.meta_description || '',

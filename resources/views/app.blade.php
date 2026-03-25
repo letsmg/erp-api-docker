@@ -25,10 +25,7 @@
         @if($seo_global->google_tag_manager)
             {!! $seo_global->google_tag_manager !!}
         @endif
-
-        @if($seo_global->ads)
-            {!! $seo_global->ads !!}
-        @endif
+        
 
         @if($seo_global->schema_markup)
             <script type="application/ld+json">

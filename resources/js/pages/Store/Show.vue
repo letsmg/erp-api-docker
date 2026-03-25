@@ -2,14 +2,15 @@
 import { Head, Link, usePage, router } from '@inertiajs/vue3';
 import { 
     ArrowLeft, ShoppingCart, Globe, Star, Loader2, 
-    Eye, EyeOff, LayoutDashboard, ChevronLeft, ChevronRight
+    Eye, EyeOff, LayoutDashboard, ChevronLeft, ChevronRight,
+    Tag, ShieldCheck, Truck
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import StoreLayout from '@/Layouts/StoreLayout.vue'; 
 
 const props = defineProps({
     product: Object,
-    relatedProducts: Array
+    relatedProducts: Array    
 });
 
 const page = usePage();
@@ -32,14 +33,23 @@ const prevImage = () => {
     }
 };
 
-// 🛠️ Helper para URL da imagem
+// 💰 Lógica de Promoção
+const isPromoActive = computed(() => {
+    if (!props.product.promo_price) return false;
+    const now = new Date();
+    const start = props.product.promo_start_at ? new Date(props.product.promo_start_at) : null;
+    const end = props.product.promo_end_at ? new Date(props.product.promo_end_at) : null;
+    if (start && now < start) return false;
+    if (end && now > end) return false;
+    return true;
+});
+
 const getImageUrl = (path) => {
     if (!path) return null;
     const cleanPath = path.startsWith('products/') ? path : `products/${path}`;
     return `/storage/${cleanPath}`;
 };
 
-// 🔐 Admin & Status
 const isAdmin = computed(() => page.props.auth?.user?.access_level === 1);
 const isUpdating = ref(false);
 
@@ -54,10 +64,7 @@ const toggleStatus = () => {
 };
 
 const formatCurrency = (value) => {
-    return new Number(value).toLocaleString('pt-BR', { 
-        style: 'currency', 
-        currency: 'BRL' 
-    });
+    return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 };
 </script>
 
@@ -67,152 +74,159 @@ const formatCurrency = (value) => {
         <meta name="description" :content="seoData.meta_description" />
         <meta name="keywords" :content="seoData.meta_keywords" />
         <link rel="canonical" :href="seoData.canonical_url || page.url" />
-        
-        <component 
-            v-if="seoData.schema_markup" 
-            is="script" 
-            type="application/ld+json"
-            v-html="seoData.schema_markup"
-        />
+        <component v-if="seoData.schema_markup" is="script" type="application/ld+json" v-html="seoData.schema_markup" />
     </Head>
 
     <StoreLayout>
-        <div class="bg-indigo-600 text-white relative overflow-hidden">
-            <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between relative z-10">
+        <div v-if="isAdmin" class="bg-indigo-600 text-white relative overflow-hidden">
+            <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between relative z-10">
                 <div class="flex items-center gap-3">
                     <div class="bg-white/20 p-2 rounded-lg backdrop-blur-md">
                         <LayoutDashboard class="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <p class="text-[11px] font-black uppercase tracking-[0.2em] leading-none">Visualização de Loja</p>
-                        <p class="text-[9px] font-medium opacity-80 uppercase tracking-widest mt-1">SEO e Galeria ativos para conferência</p>
+                        <p class="text-[11px] font-black uppercase tracking-[0.2em] leading-none">Visualização de Admin</p>
+                        <p class="text-[9px] font-medium opacity-80 uppercase tracking-widest mt-1">SEO e Status de Publicação</p>
                     </div>
                 </div>
                 
-                <div v-if="isAdmin" class="flex items-center gap-4">
-                    <button 
-                        @click="toggleStatus"
-                        :disabled="isUpdating"
-                        class="bg-white text-indigo-600 px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg hover:bg-indigo-50"
-                    >
-                        <Loader2 v-if="isUpdating" class="w-3 h-3 animate-spin" />
-                        <component v-else :is="product.is_active ? EyeOff : Eye" class="w-3.5 h-3.5" />
-                        {{ product.is_active ? 'Ocultar Produto' : 'Publicar Agora' }}
-                    </button>
-                </div>
+                <button @click="toggleStatus" :disabled="isUpdating"
+                    class="bg-white text-indigo-600 px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg hover:bg-indigo-50">
+                    <Loader2 v-if="isUpdating" class="w-3 h-3 animate-spin" />
+                    <component v-else :is="product.is_active ? EyeOff : Eye" class="w-3.5 h-3.5" />
+                    {{ product.is_active ? 'Ocultar da Loja' : 'Publicar Produto' }}
+                </button>
             </div>
-            <div class="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-white/10 to-transparent skew-x-12 transform translate-x-20"></div>
         </div>
 
-        <div class="min-h-screen bg-[#F9FAFB] pb-24">
-            <div class="max-w-6xl mx-auto px-6 py-8">
+        <div class="min-h-screen bg-[#FDFDFD] pb-24">
+            <div class="max-w-7xl mx-auto px-6 py-8">
                 <Link :href="route('products.index')" class="inline-flex items-center gap-2 text-slate-400 hover:text-indigo-600 text-[10px] font-black uppercase tracking-[0.2em] transition group">
                     <ArrowLeft class="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> 
-                    Voltar para Gestão
+                    Voltar para Loja
                 </Link>
             </div>
 
-            <main class="max-w-6xl mx-auto px-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-start">
+            <main class="max-w-7xl mx-auto px-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16 items-start">
                     
-                    <div class="flex flex-col gap-6">
-                        <div class="relative aspect-square bg-white rounded-[3rem] overflow-hidden flex items-center justify-center border border-gray-100 shadow-2xl shadow-gray-200/50 group">
+                    <div class="md:col-span-5 flex flex-col gap-6 sticky top-8">
+                        <div class="relative aspect-square bg-white rounded-[2.5rem] overflow-hidden flex items-center justify-center border border-gray-100 shadow-2xl shadow-gray-200/40 group">
+                            <div v-if="isPromoActive" class="absolute top-6 left-6 z-20 bg-red-600 text-white text-[10px] font-black px-4 py-2 rounded-full shadow-lg animate-pulse uppercase tracking-widest">
+                                Oferta Especial
+                            </div>
+
                             <template v-if="product.images?.length > 0">
-                                <img 
-                                    :key="activeImageIndex"
-                                    :src="getImageUrl(product.images[activeImageIndex].path)" 
-                                    class="object-contain w-full h-full p-12 transition-all duration-500 animate-in fade-in zoom-in-95"
-                                />
+                                <img :key="activeImageIndex" :src="getImageUrl(product.images[activeImageIndex].path)" 
+                                    class="object-contain w-full h-full p-8 transition-all duration-700 animate-in fade-in zoom-in-95" />
                                 
                                 <template v-if="product.images.length > 1">
-                                    <button @click="prevImage" class="absolute left-6 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur p-3 rounded-full shadow-xl hover:scale-110 transition active:scale-95">
-                                        <ChevronLeft class="w-6 h-6 text-gray-900" />
+                                    <button @click="prevImage" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur p-2 rounded-full shadow-xl hover:bg-indigo-600 hover:text-white transition">
+                                        <ChevronLeft class="w-5 h-5" />
                                     </button>
-                                    <button @click="nextImage" class="absolute right-6 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur p-3 rounded-full shadow-xl hover:scale-110 transition active:scale-95">
-                                        <ChevronRight class="w-6 h-6 text-gray-900" />
+                                    <button @click="nextImage" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur p-2 rounded-full shadow-xl hover:bg-indigo-600 hover:text-white transition">
+                                        <ChevronRight class="w-5 h-5" />
                                     </button>
-                                    <div class="absolute bottom-8 bg-black/5 px-4 py-1.5 rounded-full text-[10px] font-black text-gray-400 tracking-widest uppercase">
-                                        {{ activeImageIndex + 1 }} / {{ product.images.length }}
-                                    </div>
                                 </template>
                             </template>
-
-                            <div v-else class="flex flex-col items-center text-gray-200">
-                                <Globe class="w-20 h-20 mb-2 opacity-20" />
-                                <span class="text-[10px] font-black uppercase tracking-widest">Sem Imagem</span>
-                            </div>
+                            <Globe v-else class="w-20 h-20 text-gray-100" />
                         </div>
 
-                        <div v-if="product.images?.length > 1" class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                            <button 
-                                v-for="(img, index) in product.images" 
-                                :key="img.id"
-                                @click="activeImageIndex = index"
-                                class="w-20 h-20 shrink-0 rounded-2xl border-2 overflow-hidden bg-white p-2 transition-all duration-300"
-                                :class="activeImageIndex === index ? 'border-indigo-600 ring-4 ring-indigo-50 scale-105 shadow-md' : 'border-transparent opacity-60 hover:opacity-100'"
-                            >
+                        <div v-if="product.images?.length > 1" class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide justify-center">
+                            <button v-for="(img, index) in product.images" :key="img.id" @click="activeImageIndex = index"
+                                class="w-16 h-16 shrink-0 rounded-2xl border-2 overflow-hidden bg-white p-1 transition-all"
+                                :class="activeImageIndex === index ? 'border-indigo-600 scale-105 shadow-md' : 'border-gray-100 opacity-50 hover:opacity-100'">
                                 <img :src="getImageUrl(img.path)" class="w-full h-full object-contain" />
                             </button>
                         </div>
                     </div>
 
-                    <div class="flex flex-col py-4">
-                        <nav class="text-[11px] uppercase font-black text-indigo-500 mb-4 tracking-[0.3em]">
-                            {{ product.brand }} // {{ product.model }}
+                    <div class="md:col-span-5 flex flex-col pt-2">
+                        <nav class="text-[10px] uppercase font-black text-indigo-500 mb-3 tracking-[0.4em]">
+                            {{ product.brand }} <span class="text-gray-300 mx-2">/</span> {{ product.model }}
                         </nav>
 
-                        <h1 class="text-4xl lg:text-5xl font-black text-gray-900 mb-6 leading-[0.9] tracking-tighter">
+                        <h1 class="text-4xl lg:text-5xl font-black text-gray-900 mb-6 leading-none tracking-tighter">
                             {{ seoData.h1 || product.description }}
                         </h1>
 
-                        <div class="mb-10">
-                            <div class="text-5xl font-black text-gray-900 tracking-tighter">
+                        <div class="mb-10 flex flex-col">
+                            <template v-if="isPromoActive">
+                                <span class="text-gray-400 line-through text-lg font-bold">{{ formatCurrency(product.sale_price) }}</span>
+                                <div class="text-6xl font-black text-red-600 tracking-tighter">
+                                    {{ formatCurrency(product.promo_price) }}
+                                </div>
+                            </template>
+                            <div v-else class="text-6xl font-black text-gray-900 tracking-tighter">
                                 {{ formatCurrency(product.sale_price) }}
                             </div>
+                            <p class="text-[10px] font-black uppercase text-gray-400 mt-2 tracking-widest">Ou 10x sem juros no cartão</p>
                         </div>
 
-                        <div v-if="seoData.text1" class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm mb-10 relative overflow-hidden">
-                            <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-600"></div>
-                            <p class="text-gray-600 text-[15px] italic leading-relaxed whitespace-pre-line">
-                                "{{ seoData.text1 }}"
+                        <div v-if="seoData.text1" class="mb-10 border-l-4 border-indigo-600 pl-6 py-1">
+                            <p class="text-gray-600 text-[16px] leading-relaxed font-medium">
+                                {{ seoData.text1 }}
                             </p>
                         </div>
 
-                        <button class="w-full bg-black text-white py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-[11px] hover:bg-indigo-600 transition-all shadow-2xl flex items-center justify-center gap-3 active:scale-[0.98]">
-                            <ShoppingCart class="w-5 h-5" />
-                            Comprar Produto
-                        </button>
+                        <div class="flex flex-col gap-4 mb-12">
+                            <button class="w-full bg-gray-900 text-white py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-[11px] hover:bg-indigo-600 transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95">
+                                <ShoppingCart class="w-5 h-5" />
+                                Adicionar ao Carrinho
+                            </button>
+                            
+                            <div class="flex items-center justify-between px-4 py-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                <div class="flex flex-col items-center gap-1">
+                                    <Truck class="w-4 h-4 text-indigo-600" />
+                                    <span class="text-[8px] font-black uppercase">Frete Rápido</span>
+                                </div>
+                                <div class="flex flex-col items-center gap-1 border-x border-gray-200 px-8">
+                                    <ShieldCheck class="w-4 h-4 text-indigo-600" />
+                                    <span class="text-[8px] font-black uppercase">Compra Segura</span>
+                                </div>
+                                <div class="flex flex-col items-center gap-1">
+                                    <Tag class="w-4 h-4 text-indigo-600" />
+                                    <span class="text-[8px] font-black uppercase">Melhor Preço</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+        
+
                 </div>
 
-                <section class="mt-24 pt-20 border-t border-gray-200">
-                    <div class="max-w-3xl">
-                        <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tighter mb-10">
-                            {{ seoData.h2 || 'Especificações Técnicas' }}
+                <section class="mt-24 pt-20 border-t border-gray-100">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="inline-block bg-indigo-600 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest mb-6">
+                            Ficha Técnica
+                        </div>
+                        <h2 class="text-3xl lg:text-4xl font-black text-gray-900 uppercase tracking-tighter mb-10">
+                            {{ seoData.h2 || 'Especificações Completas' }}
                         </h2>
-                        <div class="prose prose-indigo max-w-none text-gray-500 text-base leading-loose whitespace-pre-line font-medium">
-                            {{ seoData.text2 || 'Detalhes não cadastrados.' }}
+                        <div class="prose prose-indigo max-w-none text-gray-600 text-lg leading-relaxed whitespace-pre-line font-medium italic">
+                            {{ seoData.text2 || 'O fabricante não disponibilizou detalhes técnicos adicionais para este modelo.' }}
                         </div>
                     </div>
                 </section>
 
                 <section class="mt-32">
-                    <div class="flex items-center gap-6 mb-12">
-                        <h3 class="text-2xl font-black text-gray-900 uppercase tracking-tighter shrink-0">Relacionados</h3>
-                        <div class="h-px w-full bg-gray-200"></div>
+                    <div class="flex items-center justify-between mb-12">
+                        <h3 class="text-2xl font-black text-gray-900 uppercase tracking-tighter">Quem viu, gostou também</h3>
+                        <div class="flex-1 h-px bg-gray-100 mx-8"></div>
+                        <Link :href="route('products.index')" class="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline">Ver Tudo</Link>
                     </div>
 
                     <div v-if="relatedProducts?.length > 0" class="grid grid-cols-2 md:grid-cols-4 gap-8">
                         <div v-for="item in relatedProducts" :key="item.id" class="group">
                             <Link :href="route('products.preview', item.id)" class="block">
-                                <div class="aspect-square bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden mb-5 flex items-center justify-center p-8 group-hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2">
+                                <div class="aspect-square bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden mb-5 flex items-center justify-center p-8 group-hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 relative">
                                     <img v-if="item.images?.length > 0" 
                                          :src="getImageUrl(item.images[0].path)" 
                                          class="max-w-full max-h-full object-contain group-hover:scale-110 transition duration-500" />
                                     <Globe v-else class="w-12 h-12 text-gray-100" />
                                 </div>
-                                <p class="text-sm font-bold text-gray-800 truncate">{{ item.description }}</p>
-                                <div class="text-base font-black text-gray-900 mt-2">{{ formatCurrency(item.sale_price) }}</div>
+                                <p class="text-[11px] font-black text-gray-900 uppercase tracking-tight truncate px-2">{{ item.description }}</p>
+                                <div class="text-sm font-black text-indigo-600 mt-1 px-2">{{ formatCurrency(item.sale_price) }}</div>
                             </Link>
                         </div>
                     </div>
@@ -226,4 +240,5 @@ const formatCurrency = (value) => {
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 img { backface-visibility: hidden; transform: translateZ(0); }
+h1, h2, h3 { letter-spacing: -0.05em; }
 </style>

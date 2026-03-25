@@ -71,17 +71,11 @@ const {
             
             <aside class="w-full md:w-72">
                 <div class="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm md:sticky md:top-32 space-y-10">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
-                            <SlidersHorizontal class="w-4 h-4" /> Filtros
-                        </h3>
-                    </div>
-                    
                     <div class="space-y-6">
                         <div class="group">
                             <label class="text-[10px] font-black uppercase text-slate-900 mb-2 block ml-1 tracking-wider">Preço Limite</label>
                             <input v-model="maxPrice" type="number" placeholder="Até R$" 
-                                   class="w-full bg-slate-50 border-none rounded-2xl text-xs font-bold p-4 focus:ring-2 focus:ring-indigo-500 transition-all" />
+                                class="w-full bg-slate-50 border-none rounded-2xl text-xs font-bold p-4 focus:ring-2 focus:ring-indigo-500 transition-all" />
                         </div>
                         
                         <div>

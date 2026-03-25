@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
+
+        // Comando para habilitar a extensão
+        DB::statement('CREATE EXTENSION IF NOT EXISTS unaccent');
+
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('supplier_id')->constrained()->onDelete('cascade');
@@ -45,9 +49,15 @@ return new class extends Migration {
             $table->index('is_featured');
             $table->index('created_at');
             $table->fullText(['description', 'brand', 'model']);
+            $table->index(['is_active', 'sale_price']); // Índice composto para a vitrine
+            $table->index('promo_price');
         });
 
         
     }
-    public function down(): void { Schema::dropIfExists('products'); }
+    public function down(): void { 
+        DB::statement('DROP EXTENSION IF EXISTS unaccent');
+
+        Schema::dropIfExists('products');     
+    }
 };

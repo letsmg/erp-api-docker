@@ -20,31 +20,38 @@ class ProductService
         $this->repository = $repository;
     }
 
+    /**
+     * Orquestra a criação do produto, imagens e SEO.
+     */
     public function storeProduct(array $data, $request)
     {
         return DB::transaction(function () use ($data, $request) {
-            $data['is_active'] = false;
+            // Geramos o slug único para o produto
             $data['slug'] = $this->generateSlug($data['description'] ?? '');
             
+            // Criamos o produto via repositório (que cuidará da regra do is_active)
             $product = $this->repository->create($data);
 
+            // Upload de imagens se houver
             if ($request->hasFile('images')) {
                 $this->handleImageUpload($product, $request->file('images'));
             }
 
+            // Sincronização de metadados SEO
             $this->syncSeo($product, $request->all());
 
             return $product;
         });
     }
 
+    /**
+     * Gerencia a atualização de dados, reordenação/remoção de fotos e SEO.
+     */
     public function updateProduct(Product $product, array $data, $request)
     {
         return DB::transaction(function () use ($product, $data, $request) {
-            // 1. Gestão de Imagens (Remoção)
-            // Filtramos as imagens que devem permanecer baseadas no array enviado pelo Vue
+            // 1. Limpeza de imagens removidas no front-end
             $existingIds = collect($data['existing_images'] ?? [])->pluck('id')->toArray();
-            
             $imagesToDelete = $product->images()->whereNotIn('id', $existingIds)->get();
 
             foreach ($imagesToDelete as $oldImg) {
@@ -52,20 +59,18 @@ class ProductService
                 $oldImg->delete();
             }
 
-            // 2. Atualizar Ordem das Imagens (Usando a coluna 'order')
+            // 2. Atualização da ordem das imagens existentes
             foreach ($data['existing_images'] ?? [] as $index => $imageData) {
-                ProductImage::where('id', $imageData['id'])
-                    ->update(['order' => $index]);
+                ProductImage::where('id', $imageData['id'])->update(['order' => $index]);
             }
             
-            // 3. Novas Imagens
+            // 3. Processamento de novas imagens
             if ($request->hasFile('new_images')) {
-                // Pegamos a última ordem ocupada para continuar a sequência
                 $lastOrder = $product->images()->max('order') ?? -1;
                 $this->handleImageUpload($product, $request->file('new_images'), $lastOrder + 1);
             }
 
-            // 4. Atualizar Slug se a descrição mudou
+            // 4. Atualização do Slug caso a descrição mude
             if (isset($data['description']) && $product->description !== $data['description']) {
                 $data['slug'] = $this->generateSlug($data['description']);
             }
@@ -80,6 +85,9 @@ class ProductService
         });
     }
 
+    /**
+     * Remove o produto e limpa arquivos físicos.
+     */
     public function deleteProduct(Product $product)
     {
         return DB::transaction(function () use ($product) {
@@ -106,13 +114,12 @@ class ProductService
         foreach ($files as $index => $file) {
             if (!$this->isImageSafe($file)) {
                 throw \Illuminate\Validation\ValidationException::withMessages([
-                    'images' => 'Uma das imagens contém conteúdo impróprio.'
+                    'images' => 'Uma das imagens contém conteúdo impróprio detectado pela IA.'
                 ]);
             }
             
             $path = $file->store('products', 'public');
             
-            // Cria via relacionamento usando a coluna 'order'
             $product->images()->create([
                 'path' => basename($path),
                 'order' => $startOrder + $index
@@ -124,20 +131,15 @@ class ProductService
     {
         $seoFields = [
             'meta_title', 'meta_description', 'meta_keywords', 'canonical_url', 
-            'h1', 'text1', 'h2', 'text2', 'schema_markup', 'google_tag_manager', 'ads'
+            'h1', 'text1', 'h2', 'text2', 'schema_markup', 'google_tag_manager', 
         ];
 
-        // Filtra apenas os campos de SEO que vieram no request
         $data = collect($input)->only($seoFields)->toArray();
-        
-        // Verifica se algum campo de SEO foi preenchido
         $hasValue = collect($data)->some(fn($v) => !empty($v));
 
         if ($hasValue || $product->seo()->exists()) {
-            // Usamos o relacionamento polimórfico definido no Model Product
-            // O Laravel cuidará de preencher seoable_id e seoable_type automaticamente
             $product->seo()->updateOrCreate(
-                [], // Deixamos vazio para ele buscar pela relação pai (product_id)
+                [], 
                 array_merge($data, ['slug' => $product->slug])
             );
         }
@@ -147,7 +149,6 @@ class ProductService
     {
         $credentialPath = base_path('google-credentials.json');
         
-        // Verifica se a biblioteca e o arquivo de credenciais existem
         if (!class_exists('Google\Cloud\Vision\V1\ImageAnnotatorClient') || !file_exists($credentialPath)) {
             return true; 
         }
@@ -160,13 +161,11 @@ class ProductService
             $safe = $response->getSafeSearchAnnotation();
             $imageAnnotator->close();
 
-            // 3: Likely, 4: Very Likely, 5: Unlikely (depende da versão, mas geralmente Likely+ é bloqueado)
-            $unsafeLevels = [4, 5]; 
+            $unsafeLevels = [4, 5]; // Likely e Very Likely
             return !(in_array($safe->getAdult(), $unsafeLevels) || in_array($safe->getViolence(), $unsafeLevels));
         } catch (\Exception $e) {
             Log::error("Erro API Vision: " . $e->getMessage());
             return true;
         }
     }
-    
 }

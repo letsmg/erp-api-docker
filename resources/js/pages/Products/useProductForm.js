@@ -46,8 +46,7 @@ export function useProductForm(props) {
         text1: '',
         text2: '',
         schema_markup: '',
-        google_tag_manager: '',
-        ads: ''
+        google_tag_manager: ''       
     });
 
     // Funções de Tags (SEO)

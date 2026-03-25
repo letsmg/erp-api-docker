@@ -28,8 +28,7 @@ return new class extends Migration
             $table->string('h2')->nullable();
             $table->text('text2')->nullable();
             $table->text('schema_markup')->nullable();
-            $table->text('google_tag_manager')->nullable();
-            $table->text('ads')->nullable();
+            $table->text('google_tag_manager')->nullable();            
             $table->string('slug')->unique();
             $table->timestamps();
 

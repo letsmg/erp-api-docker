@@ -40,11 +40,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    // Gerenciamento de Produtos
-    Route::resource('products', ProductController::class);
+    
     // Sua rota original de preview do Admin
     Route::get('/products/{product}/preview', [ProductController::class, 'preview'])->name('products.preview');
+    Route::resource('products', ProductController::class);
     Route::patch('/products/{product}/toggle', [ProductController::class, 'toggle'])->name('products.toggle');    
+    Route::patch('/products/{product}/toggle-featured', [ProductController::class, 'toggleFeatured'])->name('products.toggle-featured');
+    // Gerenciamento de Produtos
+    Route::resource('products', ProductController::class);
 
     // Outros Recursos (Recuperando os Resources que você tinha)
     Route::resource('suppliers', SupplierController::class);

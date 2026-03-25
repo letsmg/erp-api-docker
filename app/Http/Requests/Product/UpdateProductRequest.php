@@ -51,8 +51,7 @@ class UpdateProductRequest extends FormRequest
             'h2'                => 'nullable|string',
             'text2'             => 'nullable|string',
             'schema_markup'     => 'nullable|string',
-            'google_tag_manager'=> 'nullable|string',
-            'ads'               => 'nullable|string',
+            'google_tag_manager'=> 'nullable|string',            
 
             // Gestão de Imagens
             'existing_images'      => 'nullable|array',

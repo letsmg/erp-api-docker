@@ -107,8 +107,7 @@ export const fillFormData = (form: any, suppliers: any[] = []) => {
         text1: () => "Desenvolvido para atletas que buscam quebrar recordes.",
         text2: () => "Garantia de 12 meses direto com o fabricante.",
         schema_markup: () => '{"@context": "https://schema.org", "@type": "Product", "name": "Nike Air Max"}',
-        google_tag_manager: () => "\n<script>(function(w,d,s,l,i){w[l]=w[l]||[];})(window,document,'script','dataLayer','GTM-XXXX');</script>",
-        ads: () => "AW-123456789"
+        google_tag_manager: () => "\n<script>(function(w,d,s,l,i){w[l]=w[l]||[];})(window,document,'script','dataLayer','GTM-XXXX');</script>"        
     };
 
     Object.keys(form.data()).forEach((key) => {

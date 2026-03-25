@@ -198,8 +198,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleShortcut));
                     <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
                         <div class="flex items-center gap-3"><Code class="w-5 h-5 text-indigo-600" /><h3 class="text-xs font-black uppercase tracking-widest text-gray-500">Rastreamento e Tags</h3></div>
                         <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Google Tag Manager Script</label><textarea v-model="form.google_tag_manager" rows="3" class="w-full border-gray-100 bg-gray-50 rounded-2xl text-[11px] font-mono"></textarea></div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">ID Google Ads (Conversion)</label><input v-model="form.ads" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" /></div>
+                        <div class="grid grid-cols-2 gap-4">                            
                             <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">URL Canônica (Canonical)</label><input v-model="form.canonical_url" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" /></div>
                         </div>
                     </div>

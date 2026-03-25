@@ -12,7 +12,7 @@ class Seo extends Model
     protected $fillable = [
         'slug', 'meta_title', 'meta_description', 'meta_keywords', 
         'canonical_url', 'h1', 'text1', 'h2', 'text2', 
-        'schema_markup', 'google_tag_manager', 'ads', 
+        'schema_markup', 'google_tag_manager', 
         'seoable_id', 'seoable_type'
     ];
 
