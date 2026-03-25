@@ -81,7 +81,7 @@ watch(() => page.url, () => isMobileMenuOpen.value = false);
                 </button>
             </div>
 
-            <nav class="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-smooth">
                 
                 <Link :href="route('dashboard')" 
                     :class="[isUrl('/dashboard') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : ' hover:bg-indigo-900 hover:text-white']"

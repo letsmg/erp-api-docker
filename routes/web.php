@@ -22,9 +22,6 @@ Route::post('/terms/accept', [StoreController::class, 'acceptTerms'])->name('sto
 
 // 2. AUTENTICAÇÃO (Apenas para quem NÃO está logado)
 Route::middleware('guest')->group(function () {
-    // Rota de Preview que você tinha (Apenas para não logados ou links externos)
-    Route::get('/products/{id}/preview', [StoreController::class, 'preview'])->name('products.preview.public');
-    
     Route::get('/login', [LoginController::class, 'showLogin'])->name('login');    
     Route::post('/login', [LoginController::class, 'login'])->name('login.post');
     
