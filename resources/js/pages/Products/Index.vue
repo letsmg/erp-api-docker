@@ -75,7 +75,7 @@ const destroy = (id) => {
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-4 w-full md:w-auto">
-                    <div class="relative flex-1 md:w-64">
+                    <div class="relative flex-1 md:w-64 bg-white rounded-2xl">
                         <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input 
                             v-model="search"
@@ -108,7 +108,7 @@ const destroy = (id) => {
             </div>
 
             <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full text-left border-collapse shadow-2xl">
                     <thead>
                         <tr class="bg-gray-50/50 border-b border-gray-100">
                             <th class="p-5 text-[10px] font-black uppercase text-gray-400 tracking-wider">Produto</th>
