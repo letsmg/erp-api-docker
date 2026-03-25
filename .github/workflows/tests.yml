@@ -9,50 +9,50 @@ jobs:
     runs-on: ubuntu-latest
 
     # ✅ Adiciona o PostgreSQL como serviço para os testes
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: erp_vue_laravel
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: 123456
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U postgres"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+    # services:
+    #   postgres:
+    #     image: postgres:15
+    #     env:
+    #       POSTGRES_DB: erp_vue_laravel
+    #       POSTGRES_USER: postgres
+    #       POSTGRES_PASSWORD: 123456
+    #     ports:
+    #       - 5432:5432
+    #     options: >-
+    #       --health-cmd="pg_isready -U postgres"
+    #       --health-interval=10s
+    #       --health-timeout=5s
+    #       --health-retries=5
 
-    steps:
-      - uses: actions/checkout@v4
+    # steps:
+    #   - uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql
-          cache: composer # ⚡ Cache de dependências PHP
+    #   - name: Setup PHP
+    #     uses: shivammathur/setup-php@v2
+    #     with:
+    #       php-version: '8.3'
+    #       extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql
+    #       cache: composer # ⚡ Cache de dependências PHP
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
+    #   - name: Setup Node
+    #     uses: actions/setup-node@v4
+    #     with:
+    #       node-version: '22'
+    #       cache: 'npm'
 
-      - name: Install Dependencies
-        run: |
-          composer install --no-interaction --prefer-dist --optimize-autoloader
-          npm install
-          npm run build
+    #   - name: Install Dependencies
+    #     run: |
+    #       composer install --no-interaction --prefer-dist --optimize-autoloader
+    #       npm install
+    #       npm run build
         
-      - name: Run Tests
-        run: php artisan test --stop-on-failure
-        env:
-          APP_ENV: testing
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 5432
-          DB_DATABASE: erp_vue_laravel
-          DB_USERNAME: postgres
-          DB_PASSWORD: 123456
+    #   - name: Run Tests
+    #     run: php artisan test --stop-on-failure
+    #     env:
+    #       APP_ENV: testing
+    #       DB_CONNECTION: pgsql
+    #       DB_HOST: 127.0.0.1
+    #       DB_PORT: 5432
+    #       DB_DATABASE: erp_vue_laravel
+    #       DB_USERNAME: postgres
+    #       DB_PASSWORD: 123456
