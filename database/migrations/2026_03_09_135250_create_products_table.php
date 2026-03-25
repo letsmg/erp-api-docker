@@ -30,13 +30,13 @@ return new class extends Migration {
 
             $table->string('slug')->unique();            
 
-            $table->decimal('weight', 8, 3)->nullable()->after('stock_quantity'); // em kg (ex: 1.500)
-            $table->decimal('width', 8, 2)->nullable()->after('weight');  // em cm
-            $table->decimal('height', 8, 2)->nullable()->after('width');  // em cm
-            $table->decimal('length', 8, 2)->nullable()->after('height'); // em cm
+            $table->decimal('weight', 8, 3)->nullable(); // em kg (ex: 1.500)
+            $table->decimal('width', 8, 2)->nullable();  // em cm
+            $table->decimal('height', 8, 2)->nullable();  // em cm
+            $table->decimal('length', 8, 2)->nullable(); // em cm
             
             // Opcional: frete grátis por produto
-            $table->boolean('free_shipping')->default(false)->after('length');
+            $table->boolean('free_shipping')->default(false);
             
             $table->timestamps();
 

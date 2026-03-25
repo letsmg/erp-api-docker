@@ -8,6 +8,7 @@ export function useProductForm(props) {
     const tagInput = ref('');
 
     const form = useForm({
+        // Geral
         supplier_id: null,
         description: '',
         brand: '',
@@ -20,14 +21,25 @@ export function useProductForm(props) {
         is_active: true,
         is_featured: false,
         images: [],
+        
+        // Financeiro
         cost_price: 0,
         sale_price: 0,
         promo_price: null,
         promo_start_at: '',
         promo_end_at: '',
+        
+        // Logística (Mantido conforme seu código: inicializado com 0.1)
+        weight: 1.5,
+        width: 1.5,
+        height: 1.1,
+        length: 1.1,
+        free_shipping: false,
+
+        // Marketing & SEO
         meta_title: '',
         meta_description: '',
-        meta_keywords: [], // No front-end ele é um Array
+        meta_keywords: [], 
         canonical_url: '',
         h1: '',
         h2: '',
@@ -38,6 +50,7 @@ export function useProductForm(props) {
         ads: ''
     });
 
+    // Funções de Tags (SEO)
     const addTag = () => {
         const val = tagInput.value.trim();
         if (val) {
@@ -53,6 +66,7 @@ export function useProductForm(props) {
         form.meta_keywords.splice(index, 1);
     };
 
+    // Upload de Imagens
     const handleImageUpload = (e) => {
         const files = Array.from(e.target.files);
         if (form.images.length + files.length > 6) {
@@ -60,6 +74,7 @@ export function useProductForm(props) {
             return;
         }
         files.forEach(file => {
+            // Preservada a lógica de tempId para controle de estado
             file.tempId = Math.random().toString(36).substr(2, 9);
             form.images.push(file);
             imagePreviews.value.push(URL.createObjectURL(file));
@@ -71,17 +86,21 @@ export function useProductForm(props) {
         imagePreviews.value.splice(index, 1);
     };
 
+    // Lógica de Reordenação (Mantida conforme seu código)
     const onDragEnd = () => {
         imagePreviews.value = form.images.map(file => 
             file instanceof File ? URL.createObjectURL(file) : file
         );
     };
 
+    // Atalhos de Teclado
     const handleKeydown = (e) => {
+        // Atalho para preencher (CTRL + SHIFT + P)
         if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p') {
             e.preventDefault();
-            fillFormData(form, props.suppliers);
+            fillTestForm();
         }
+        // Atalho para limpar (CTRL + SHIFT + L)
         if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'l') {
             e.preventDefault();
             clearFormData(form);
@@ -90,9 +109,13 @@ export function useProductForm(props) {
         }
     };
 
+    // Função de preenchimento para uso externo/atalho
+    const fillTestForm = () => fillFormData(form, props.suppliers);
+
     onMounted(() => window.addEventListener('keydown', handleKeydown));
     onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
 
+    // Cálculos Financeiros
     const profitData = computed(() => {
         const cost = parseFloat(form.cost_price) || 0;
         const sale = parseFloat(form.sale_price) || 0;
@@ -105,8 +128,7 @@ export function useProductForm(props) {
     });
 
     const submit = () => {
-        // --- CORREÇÃO AQUI ---
-        // Criamos uma cópia para transformar o Array em String antes de enviar ao Laravel
+        // Converte Array de keywords em String antes de enviar
         const dataToSend = {
             ...form.data(),
             meta_keywords: Array.isArray(form.meta_keywords) 
@@ -122,12 +144,24 @@ export function useProductForm(props) {
                 imagePreviews.value = [];
                 tagInput.value = '';
             },
+            onError: () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         });
     };
 
     return {
-        form, activeTab, imagePreviews, tagInput,
-        addTag, removeTag, handleImageUpload, 
-        removeImage, onDragEnd, profitData, submit
+        form, 
+        activeTab, 
+        imagePreviews, 
+        tagInput,
+        addTag, 
+        removeTag, 
+        handleImageUpload, 
+        removeImage, 
+        onDragEnd, 
+        profitData, 
+        fillTestForm, 
+        submit
     };
 }

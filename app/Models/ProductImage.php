@@ -12,4 +12,9 @@ class ProductImage extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function setPositionAttribute($value)
+    {
+        $this->attributes['order'] = $value;
+    }
 }

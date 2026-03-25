@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Http\Requests\Product\StoreProductRequest;
-use App\Http\Requests\Product\UpdateProductRequest;
 use App\Services\ProductService;
 use App\Repositories\ProductRepository;
 use Inertia\Inertia;
+use App\Models\Supplier;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -40,18 +41,23 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('message', 'Produto cadastrado!');
     }
 
-    public function edit(Product $product)
+    public function edit(Product $product) 
     {
+        $product->load(['seo', 'images']);
+        
         return Inertia::render('Products/Edit', [
-            'product' => $product->load(['images', 'seo']),
-            'suppliers' => $this->repository->getActiveSuppliers()
+            'product' => $product,
+            'suppliers' => Supplier::all()
         ]);
     }
 
-    public function update(UpdateProductRequest $request, Product $product)
+    public function update(Request $request, Product $product)
     {
-        $this->service->updateProduct($product, $request->validated(), $request);
-        return redirect()->route('products.index')->with('message', 'Produto atualizado!');
+        // O Service agora cuida de salvar os dados, SEO e a ordem das imagens
+        $this->service->updateProduct($product, $request->all(), $request);
+
+        return redirect()->route('products.index')
+            ->with('message', 'Produto atualizado com sucesso!');
     }
 
     public function toggle(Product $product)
@@ -64,5 +70,14 @@ class ProductController extends Controller
     {
         $this->service->deleteProduct($product);
         return redirect()->route('products.index')->with('message', 'Removido com sucesso.');
+    }
+
+    public function show(Product $product)
+    {
+        $product->load(['supplier', 'images']);
+
+        return Inertia::render('Products/Show', [
+            'product' => $product
+        ]);
     }
 }

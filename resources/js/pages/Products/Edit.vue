@@ -2,11 +2,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import draggable from 'vuedraggable';
-import { ref, onMounted } from 'vue';
 import { useProductEdit } from './useProductEdit';
 import { 
     Save, ArrowLeft, DollarSign, Camera, X, Code, 
-    Search, FileText, GripVertical
+    Search, FileText, Truck
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -14,47 +13,25 @@ const props = defineProps({
     suppliers: Array
 });
 
+// Extraímos a lógica do composable
 const { 
-    form, activeTab, newImagePreviews, 
-    handleImageUpload, removeExistingImage, removeNewImage, 
-    profitData, submit 
+    form, 
+    activeTab, 
+    newImagePreviews, 
+    tagInput,      
+    addTag,        
+    removeTag,     
+    handleImageUpload, 
+    removeExistingImage, 
+    removeNewImage, 
+    profitData, 
+    submit 
 } = useProductEdit(props);
 
-// --- Lógica de Meta Keywords (Tags) ---
-const keywordsArray = ref([]);
-const newTag = ref('');
-
-onMounted(() => {
-    if (form.meta_keywords) {
-        keywordsArray.value = form.meta_keywords.split(',')
-            .map(t => t.trim())
-            .filter(t => t !== '');
-    }
-});
-
-const addTag = () => {
-    const tag = newTag.value.trim().replace(/,/g, '');
-    if (tag && !keywordsArray.value.includes(tag)) {
-        keywordsArray.value.push(tag);
-        syncKeywords();
-    }
-    newTag.value = '';
-};
-
-const removeTag = (index) => {
-    keywordsArray.value.splice(index, 1);
-    syncKeywords();
-};
-
-const syncKeywords = () => {
-    form.meta_keywords = keywordsArray.value.join(',');
-};
-// ---------------------------------------
-
-const dragOptions = {
-    animation: 200,
-    ghostClass: "opacity-30",
-    dragClass: "rotate-2"
+const dragOptions = { 
+    animation: 200, 
+    ghostClass: "opacity-30", 
+    dragClass: "rotate-2" 
 };
 </script>
 
@@ -82,33 +59,23 @@ const dragOptions = {
                 
                 <div v-show="activeTab === 'geral'" class="animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-6">
                     <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-4 tracking-wider">
-                            Galeria do Produto (Arraste para definir a ordem)
-                        </label>
-                        
+                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-4 tracking-wider">Galeria (Arraste para ordenar)</label>
                         <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
                             <draggable 
                                 v-model="form.existing_images" 
-                                item-key="id"
-                                tag="div"
-                                class="contents"
+                                item-key="id" 
+                                class="contents" 
                                 v-bind="dragOptions"
                             >
                                 <template #item="{ element, index }">
-                                    <div class="relative group aspect-square rounded-2xl overflow-hidden border border-gray-100 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-all">
+                                    <div class="relative group aspect-square rounded-2xl overflow-hidden border border-gray-100 shadow-sm cursor-move">
                                         <img :src="'/storage/products/' + element.path" class="w-full h-full object-cover" />
-                                        
-                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-2">
+                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                                             <button type="button" @click="removeExistingImage(index)" class="bg-white text-red-600 p-2 rounded-full shadow-lg hover:scale-110 transition">
                                                 <X class="w-4 h-4" />
                                             </button>
-                                            <GripVertical class="text-white w-5 h-5 opacity-50" />
                                         </div>
-
-                                        <span class="absolute top-2 left-2 bg-black/50 backdrop-blur-md text-[8px] text-white px-2 py-0.5 rounded-full uppercase font-black">
-                                            {{ index + 1 }}º
-                                        </span>
-                                        <span class="absolute bottom-1 right-1 text-[8px] text-white/70 font-black uppercase">Salva</span>
+                                        <span class="absolute top-2 left-2 bg-black/50 backdrop-blur-md text-[8px] text-white px-2 py-0.5 rounded-full uppercase font-black">{{ index + 1 }}º</span>
                                     </div>
                                 </template>
                             </draggable>
@@ -118,7 +85,7 @@ const dragOptions = {
                                 <button type="button" @click="removeNewImage(index)" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-md">
                                     <X class="w-3 h-3" />
                                 </button>
-                                <span class="absolute bottom-1 left-1 bg-indigo-600 text-[8px] text-white px-2 py-0.5 rounded-full uppercase font-black">Nova</span>
+                                <span class="absolute bottom-1 left-1 bg-indigo-600 text-[6px] text-white px-1 rounded font-bold uppercase">Novo</span>
                             </div>
 
                             <label v-if="(form.existing_images.length + form.new_images.length) < 6" class="aspect-square border-2 border-dashed border-gray-100 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition group">
@@ -126,7 +93,6 @@ const dragOptions = {
                                 <input type="file" class="hidden" multiple accept="image/*" @change="handleImageUpload" />
                             </label>
                         </div>
-                        <p class="mt-4 text-[9px] text-gray-400 font-medium">Dica: A primeira imagem (1º) será a foto principal do produto.</p>
                     </div>
 
                     <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -141,170 +107,124 @@ const dragOptions = {
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Código de Barras</label>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">EAN / Barcode</label>
                             <input v-model="form.barcode" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="flex flex-col">
-                                <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Marca</label>
-                                <input v-model="form.brand" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
-                            </div>
-                            <div class="flex flex-col">
-                                <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Modelo</label>
-                                <input v-model="form.model" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
-                            </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Marca</label>
+                            <input v-model="form.brand" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="flex flex-col">
-                                <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Coleção</label>
-                                <input v-model="form.collection" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
-                            </div>
-                            <div class="flex flex-col">
-                                <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Tamanho</label>
-                                <input v-model="form.size" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
-                            </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Modelo</label>
+                            <input v-model="form.model" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
                         </div>
-                        <div class="grid grid-cols-2 gap-4 md:col-span-2">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Coleção</label>
+                            <input v-model="form.collection" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Tamanho</label>
+                            <input v-model="form.size" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Gênero</label>
                             <select v-model="form.gender" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold uppercase text-[10px]">
                                 <option value="Masculino">Masculino</option>
                                 <option value="Feminino">Feminino</option>
                                 <option value="Unissex">Unissex</option>
                                 <option value="Infantil">Infantil</option>
                             </select>
-                            <input v-model="form.stock_quantity" type="number" placeholder="Qtd. Estoque" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-black" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Estoque Real</label>
+                            <input v-model="form.stock_quantity" type="number" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-black text-indigo-600" />
                         </div>
                     </div>
                 </div>
 
-                <div v-show="activeTab === 'precos'" class="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div v-show="activeTab === 'precos'" class="animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="md:col-span-2 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                            <h3 class="flex items-center text-xs font-black uppercase text-gray-400 mb-6 italic"><DollarSign class="w-4 h-4 mr-2" /> Precificação</h3>
-                            <div class="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Custo (R$)</label>
-                                    <input v-model="form.cost_price" type="number" step="0.01" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-black text-xl" />
+                        <div class="md:col-span-2 space-y-6">
+                            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+                                <h3 class="flex items-center text-xs font-black uppercase text-gray-400 mb-6 italic"><DollarSign class="w-4 h-4 mr-2" /> Preços</h3>
+                                <div class="grid grid-cols-2 gap-6">
+                                    <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Custo (R$)</label><input v-model="form.cost_price" type="number" step="0.01" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" /></div>
+                                    <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Venda (R$)</label><input v-model="form.sale_price" type="number" step="0.01" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-black text-indigo-600" /></div>
                                 </div>
-                                <div>
-                                    <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Venda (R$)</label>
-                                    <input v-model="form.sale_price" type="number" step="0.01" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-black text-xl text-indigo-600" />
+                                <div class="mt-8 p-6 bg-green-50 rounded-2xl border border-green-100 flex justify-between items-center text-green-700">
+                                    <div><p class="text-[10px] font-black uppercase">Lucro</p><p class="text-3xl font-black">{{ profitData.value }}</p></div>
+                                    <div class="text-right"><p class="text-[10px] font-black uppercase">Margem</p><p class="text-3xl font-black">{{ profitData.percentage }}%</p></div>
                                 </div>
                             </div>
-                            <div class="mt-8 p-6 bg-green-50 rounded-2xl border border-green-100 flex justify-between items-center">
-                                <div>
-                                    <p class="text-[10px] font-black text-green-700 uppercase mb-1">Lucro Estimado</p>
-                                    <p class="text-3xl font-black text-green-600 tracking-tighter">{{ profitData.value }}</p>
+
+                            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h3 class="flex items-center text-xs font-black uppercase text-gray-400 italic"><Truck class="w-4 h-4 mr-2" /> Logística</h3>
+                                    <label class="flex items-center gap-2 cursor-pointer"><span class="text-[10px] font-black uppercase text-gray-400">Frete Grátis</span><input type="checkbox" v-model="form.free_shipping" class="rounded text-indigo-600 border-gray-300"></label>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-[10px] font-black text-green-700 uppercase mb-1">Margem %</p>
-                                    <p class="text-3xl font-black text-green-600 tracking-tighter">{{ profitData.percentage }}%</p>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div><label class="block text-[9px] font-black uppercase text-gray-400 mb-1">Peso (kg)</label><input v-model="form.weight" type="number" step="0.001" class="w-full border-gray-100 bg-gray-50 rounded-xl font-bold text-sm" placeholder="0.000" /></div>
+                                    <div><label class="block text-[9px] font-black uppercase text-gray-400 mb-1">Largura (cm)</label><input v-model="form.width" type="number" step="0.01" class="w-full border-gray-100 bg-gray-50 rounded-xl font-bold text-sm" placeholder="0.00" /></div>
+                                    <div><label class="block text-[9px] font-black uppercase text-gray-400 mb-1">Altura (cm)</label><input v-model="form.height" type="number" step="0.01" class="w-full border-gray-100 bg-gray-50 rounded-xl font-bold text-sm" placeholder="0.00" /></div>
+                                    <div><label class="block text-[9px] font-black uppercase text-gray-400 mb-1">Comp. (cm)</label><input v-model="form.length" type="number" step="0.01" class="w-full border-gray-100 bg-gray-50 rounded-xl font-bold text-sm" placeholder="0.00" /></div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bg-indigo-900 p-8 rounded-3xl shadow-xl text-white">
-                            <h3 class="flex items-center text-xs font-black uppercase opacity-60 mb-6 italic">Promoção Ativa</h3>
+                        <div class="bg-indigo-900 p-8 rounded-3xl text-white h-fit">
+                            <h3 class="text-[10px] font-black uppercase opacity-60 mb-6 italic">Promoção</h3>
                             <div class="space-y-4">
-                                <input v-model="form.promo_price" type="number" step="0.01" class="w-full bg-indigo-800 border-none rounded-2xl font-black text-white" placeholder="Preço Promo" />
-                                <div>
-                                    <label class="text-[9px] font-black uppercase opacity-40">Início</label>
-                                    <input v-model="form.promo_start_at" type="datetime-local" class="w-full bg-indigo-800 border-none rounded-xl text-[10px] text-white" />
-                                </div>
-                                <div>
-                                    <label class="text-[9px] font-black uppercase opacity-40">Fim</label>
-                                    <input v-model="form.promo_end_at" type="datetime-local" class="w-full bg-indigo-800 border-none rounded-xl text-[10px] text-white" />
-                                </div>
+                                <div><label class="text-[9px] opacity-40 block mb-1">Preço Promo</label><input v-model="form.promo_price" type="number" step="0.01" class="w-full bg-indigo-800 border-none rounded-2xl text-white font-bold" /></div>
+                                <div><label class="text-[9px] opacity-40 block mb-1">Início</label><input v-model="form.promo_start_at" type="datetime-local" class="w-full bg-indigo-800 border-none rounded-xl text-[10px] text-white" /></div>
+                                <div><label class="text-[9px] opacity-40 block mb-1">Término</label><input v-model="form.promo_end_at" type="datetime-local" class="w-full bg-indigo-800 border-none rounded-xl text-[10px] text-white" /></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div v-show="activeTab === 'seo'" class="animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-6">
-                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 bg-indigo-50 rounded-lg"><Code class="w-5 h-5 text-indigo-600" /></div>
-                            <h3 class="text-xs font-black uppercase tracking-widest text-gray-500">Scripts de Rastreamento</h3>
-                        </div>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 italic">Google Tag Manager (Script)</label>
-                                <textarea v-model="form.google_tag_manager" rows="4" class="w-full border-gray-100 bg-gray-50 rounded-2xl text-[11px] font-mono text-indigo-600"></textarea>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 italic">ID Google Ads</label>
-                                    <input v-model="form.ads" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 italic">URL Canônica</label>
-                                    <input v-model="form.canonical_url" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
-                                </div>
-                            </div>
+                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+                        <div class="flex items-center gap-3"><Code class="w-5 h-5 text-indigo-600" /><h3 class="text-xs font-black uppercase tracking-widest text-gray-500">Tags e Scripts</h3></div>
+                        <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Google Tag Manager Script</label><textarea v-model="form.google_tag_manager" rows="3" class="w-full border-gray-100 bg-gray-50 rounded-2xl text-[11px] font-mono"></textarea></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">ID Google Ads</label><input v-model="form.ads" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold text-xs" /></div>
+                            <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">URL Canônica</label><input v-model="form.canonical_url" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold text-xs" /></div>
                         </div>
                     </div>
 
-                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="md:col-span-2 flex items-center gap-3 mb-2">
-                            <div class="p-2 bg-amber-50 rounded-lg"><Search class="w-5 h-5 text-amber-600" /></div>
-                            <h3 class="text-xs font-black uppercase tracking-widest text-gray-500">Otimização (Meta Tags)</h3>
-                        </div>
+                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+                        <div class="flex items-center gap-3"><Search class="w-5 h-5 text-amber-600" /><h3 class="text-xs font-black uppercase tracking-widest text-gray-500">SEO Meta Tags</h3></div>
+                        <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">SEO Title</label><input v-model="form.meta_title" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" /></div>
                         <div>
-                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 italic">Meta Title</label>
-                            <input v-model="form.meta_title" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
-                        </div>
-                        
-                        <div>
-                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 italic">Meta Keywords</label>
-                            <div class="flex flex-wrap items-center gap-2 p-2.5 border border-gray-100 bg-gray-50 rounded-2xl min-h-[46px]">
-                                <span v-for="(tag, index) in keywordsArray" :key="index" class="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-gray-200 text-indigo-600 text-[10px] font-black uppercase rounded-lg shadow-sm">
-                                    {{ tag }}
-                                    <button type="button" @click="removeTag(index)" class="text-gray-400 hover:text-red-500 transition">
-                                        <X class="w-3 h-3" />
-                                    </button>
-                                </span>
-                                <input 
-                                    v-model="newTag" 
-                                    type="text" 
-                                    @keydown.enter.prevent="addTag"
-                                    @keydown.comma.prevent="addTag"
-                                    placeholder="TAG + ENTER"
-                                    class="flex-1 bg-transparent border-none focus:ring-0 text-[11px] font-bold placeholder:text-gray-300 placeholder:font-black"
-                                />
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Palavras-Chave (Enter)</label>
+                            <div class="flex flex-wrap gap-2 p-3 border border-gray-100 bg-gray-50 rounded-2xl">
+                                <div v-for="(tag, index) in form.meta_keywords" :key="index" class="flex items-center bg-indigo-600 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-xl">
+                                    {{ tag }} <button type="button" @click="removeTag(index)" class="ml-2 hover:bg-indigo-700 transition"><X class="w-3 h-3" /></button>
+                                </div>
+                                <input v-model="tagInput" @keydown.enter.prevent="addTag" placeholder="Nova tag..." class="flex-1 bg-transparent border-none focus:ring-0 text-sm font-bold p-0" />
                             </div>
                         </div>
-
-                        <div class="md:col-span-2">
-                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 italic">Meta Description</label>
-                            <textarea v-model="form.meta_description" rows="2" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold"></textarea>
-                        </div>
+                        <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Meta Description</label><textarea v-model="form.meta_description" rows="2" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold text-xs"></textarea></div>
                     </div>
 
-                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="md:col-span-2 flex items-center gap-3 mb-2">
-                            <div class="p-2 bg-green-50 rounded-lg"><FileText class="w-5 h-5 text-green-600" /></div>
-                            <h3 class="text-xs font-black uppercase tracking-widest text-gray-500">Conteúdo SEO da Página</h3>
+                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+                        <div class="flex items-center gap-3"><FileText class="w-5 h-5 text-green-600" /><h3 class="text-xs font-black uppercase tracking-widest text-gray-500">Conteúdo On-Page</h3></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Título (H1)</label><input v-model="form.h1" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" /></div>
+                            <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Apresentação (Text 1)</label><textarea v-model="form.text1" rows="3" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold"></textarea></div>    
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 italic">H1 (Título Principal)</label>
-                            <input v-model="form.h1" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Subtítulo (H2)</label><input v-model="form.h2" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" /></div>
+                            <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Detalhes (Text 2)</label><textarea v-model="form.text2" rows="3" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold"></textarea></div>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 italic">H2 (Subtítulo)</label>
-                            <input v-model="form.h2" type="text" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-bold" />
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 italic">Schema Markup (JSON-LD)</label>
-                            <textarea v-model="form.schema_markup" rows="3" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-mono text-[10px]"></textarea>
-                        </div>
+                        <div><label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Schema JSON-LD</label><textarea v-model="form.schema_markup" rows="2" class="w-full border-gray-100 bg-gray-50 rounded-2xl font-mono text-[10px]"></textarea></div>
                     </div>
                 </div>
 
-                <div class="flex flex-col md:flex-row items-center justify-end gap-6 border-t border-gray-100 pt-8">
-                    <Link :href="route('products.index')" class="text-[10px] font-black uppercase text-gray-400 hover:text-gray-600 transition tracking-[0.2em]">Cancelar</Link>
+                <div class="flex items-center justify-end gap-6 border-t border-gray-100 pt-8">
                     <button type="submit" :disabled="form.processing" class="bg-black text-white px-12 py-5 rounded-3xl font-black uppercase text-[10px] tracking-[0.3em] shadow-2xl hover:bg-indigo-600 transition-all flex items-center gap-3">
-                        <Save v-if="!form.processing" class="w-4 h-4" />
-                        <span v-else class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
-                        {{ form.processing ? 'Salvando...' : 'Atualizar Produto' }}
+                        <Save class="w-4 h-4" />
+                        {{ form.processing ? 'Salvando...' : 'Salvar Alterações' }}
                     </button>
                 </div>
             </form>
