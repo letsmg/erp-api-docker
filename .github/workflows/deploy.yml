@@ -5,7 +5,7 @@ on:
     branches: [main]
    
 #quando usar em producao, aguardar testes primeiro
-# on: 
+
 #   workflow_run:
 #     workflows: ["🚀 CI tests"] # Deve ser o nome exato do outro arquivo
 #     types:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     
     #trava de segurança para substituir o needs em arquivos separados:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }} #
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }} #
 
     steps:
       - name: 🔑 Configure SSH
