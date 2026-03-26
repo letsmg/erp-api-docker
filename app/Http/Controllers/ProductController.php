@@ -31,7 +31,7 @@ class ProductController extends Controller
     {
         $this->authorize('viewAny', Product::class);
 
-        $filters = $request->only(['search']);
+        $filters = $request->all(['search','blocked']);
         
         return Inertia::render('Products/Index', [
             'products' => $this->repository->getFiltered($filters),

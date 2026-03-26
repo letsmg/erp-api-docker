@@ -17,7 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     
     #trava de segurança para substituir o needs em arquivos separados:
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }} #
+    # aqui em baixo está comentado sim mesmo parecendo que não está com #
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }} #
 
     steps:
       - name: 🔑 Configure SSH

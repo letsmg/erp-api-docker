@@ -13,33 +13,42 @@ const user = page.props.auth.user;
 
 const props = defineProps({ 
     products: Object, // Objeto de paginação do Laravel
-    filters: Object   // Filtros vindos do Controller
+    filters: Object   // Filtros vindos do Controller (ex: filters.search, filters.blocked)
 });
 
+// Inicializamos as refs com os valores que vêm do servidor
 const search = ref(props.filters.search || '');
-const showOnlyBlocked = ref(false);
+const showOnlyBlocked = ref(props.filters.blocked == 1);
 
-// 🔍 Lógica de busca com debounce e trava de 3 caracteres
-watch(search, debounce((value) => {
+// 🔄 Função única para atualizar os filtros no servidor
+const updateFilters = debounce(() => {
+    router.get(route('products.index'), 
+        { 
+            search: search.value, 
+            blocked: showOnlyBlocked.value ? 1 : 0 
+        }, 
+        { 
+            preserveState: true, 
+            replace: true,
+            preserveScroll: true 
+        }
+    );
+}, 300);
+
+// 🔍 Monitora a busca (respeitando a trava de 3 caracteres)
+watch(search, (value) => {
     if (value.length > 2 || value.length === 0) {
-        router.get(route('products.index'), 
-            { search: value }, 
-            { 
-                preserveState: true, 
-                replace: true,
-                preserveScroll: true 
-            }
-        );
+        updateFilters();
     }
-}, 300));
-
-const filteredProducts = computed(() => {
-    const list = props.products.data || [];
-    if (showOnlyBlocked.value) {
-        return list.filter(product => !product.is_active);
-    }
-    return list;
 });
+
+// 🔒 Monitora o checkbox de bloqueados
+watch(showOnlyBlocked, () => {
+    updateFilters();
+});
+
+// Agora os produtos filtrados vêm direto da prop, já que o servidor faz o trabalho pesado
+const filteredProducts = computed(() => props.products.data || []);
 
 const formatCurrency = (value) => {
     return new Number(value || 0).toLocaleString('pt-BR', {

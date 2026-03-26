@@ -17,12 +17,18 @@ class ProductRepository
                 $q->orderBy('order', 'asc');
             }]);
 
-        // 🔍 Filtro de Busca
+        // 🔒 1. Filtro de Bloqueados (is_active)
+        // Se o filtro 'blocked' vier como 1, filtramos apenas os inativos (false)
+        if (isset($filters['blocked']) && $filters['blocked'] == 1) {
+            $query->where('is_active', false);
+        }
+
+        // 🔍 2. Filtro de Busca Textual
         if (!empty($filters['search'])) {
             $search = trim($filters['search']);
 
             $query->where(function ($q) use ($search) {
-                // 1. Grupo de Busca por Texto (Acentos e Case Insensitive)
+                // Grupo de Busca por Texto
                 $q->where(function ($sub) use ($search) {
                     $searchTerm = "%{$search}%";
                     $sub->whereRaw("unaccent(description) ilike unaccent(?)", [$searchTerm])
@@ -30,7 +36,7 @@ class ProductRepository
                         ->orWhereRaw("unaccent(model) ilike unaccent(?)", [$searchTerm]);
                 });
 
-                // 2. Grupo de Busca por Preço (Se for numérico)
+                // Grupo de Busca por Preço
                 $numericValue = $this->parseNumeric($search);
                 if ($numericValue > 0) {
                     $q->orWhere('sale_price', '<=', $numericValue)
@@ -38,13 +44,13 @@ class ProductRepository
                 }
             });
 
-            // 📈 Ordenação por preço (considerando promoções)
             $query->orderByRaw('COALESCE(promo_price, sale_price) DESC');
         } else {
             $query->latest();
         }
 
-        return $query->paginate(12);
+        // Importante: usamos withQueryString para manter os filtros ao trocar de página
+        return $query->paginate(12)->withQueryString();
     }
 
     /**
