@@ -1,0 +1,192 @@
+version: '3.8'
+
+services:
+  # Main Laravel API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: erp-api-gateway-prod
+    volumes:
+      - storage_data:/var/www/html/storage
+      - cache_data:/var/www/html/bootstrap/cache
+    environment:
+      - APP_NAME=ERP API
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=https://your-domain.com
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=erp_api_prod
+      - DB_USERNAME=erp_user
+      - DB_PASSWORD=secure_password_here
+      - CACHE_STORE=redis
+      - REDIS_HOST=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=redis
+    networks:
+      - erp-network
+    depends_on:
+      - auth-service
+      - client-service
+      - product-service
+      - user-service
+      - sale-service
+      - mysql
+      - redis
+    restart: always
+
+  # Auth Module Service
+  auth-service:
+    build:
+      context: ./app/Modules/Auth
+      dockerfile: Dockerfile
+    container_name: erp-auth-service-prod
+    volumes:
+      - auth_storage:/var/www/auth/storage
+    environment:
+      - SERVICE_NAME=auth
+      - SERVICE_PORT=9001
+      - APP_ENV=production
+    networks:
+      - erp-network
+    restart: always
+    deploy:
+      replicas: 2
+
+  # Client Module Service
+  client-service:
+    build:
+      context: ./app/Modules/Client
+      dockerfile: Dockerfile
+    container_name: erp-client-service-prod
+    volumes:
+      - client_storage:/var/www/client/storage
+    environment:
+      - SERVICE_NAME=client
+      - SERVICE_PORT=9002
+      - APP_ENV=production
+    networks:
+      - erp-network
+    restart: always
+    deploy:
+      replicas: 2
+
+  # Product Module Service
+  product-service:
+    build:
+      context: ./app/Modules/Product
+      dockerfile: Dockerfile
+    container_name: erp-product-service-prod
+    volumes:
+      - product_storage:/var/www/product/storage
+    environment:
+      - SERVICE_NAME=product
+      - SERVICE_PORT=9003
+      - APP_ENV=production
+    networks:
+      - erp-network
+    restart: always
+    deploy:
+      replicas: 2
+
+  # User Module Service
+  user-service:
+    build:
+      context: ./app/Modules/User
+      dockerfile: Dockerfile
+    container_name: erp-user-service-prod
+    volumes:
+      - user_storage:/var/www/user/storage
+    environment:
+      - SERVICE_NAME=user
+      - SERVICE_PORT=9004
+      - APP_ENV=production
+    networks:
+      - erp-network
+    restart: always
+    deploy:
+      replicas: 2
+
+  # Sale Module Service
+  sale-service:
+    build:
+      context: ./app/Modules/Sale
+      dockerfile: Dockerfile
+    container_name: erp-sale-service-prod
+    volumes:
+      - sale_storage:/var/www/sale/storage
+    environment:
+      - SERVICE_NAME=sale
+      - SERVICE_PORT=9005
+      - APP_ENV=production
+    networks:
+      - erp-network
+    restart: always
+    deploy:
+      replicas: 2
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: erp-mysql-prod
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_here
+      MYSQL_DATABASE: erp_api_prod
+      MYSQL_USER: erp_user
+      MYSQL_PASSWORD: secure_password_here
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - erp-network
+    restart: always
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: erp-redis-prod
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./docker/redis/redis.conf:/etc/redis/redis.conf
+    command: redis-server /etc/redis/redis.conf
+    networks:
+      - erp-network
+    restart: always
+
+  # Nginx Load Balancer
+  nginx-lb:
+    image: nginx:alpine
+    container_name: erp-nginx-lb-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx-lb/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx-lb/conf.d:/etc/nginx/conf.d
+      - ./docker/nginx-lb/ssl:/etc/nginx/ssl
+    networks:
+      - erp-network
+    depends_on:
+      - api-gateway
+    restart: always
+
+networks:
+  erp-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  storage_data:
+  cache_data:
+  auth_storage:
+  client_storage:
+  product_storage:
+  user_storage:
+  sale_storage:

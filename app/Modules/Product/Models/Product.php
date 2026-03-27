@@ -4,15 +4,16 @@ namespace App\Modules\Product\Models;
 
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+use MongoDB\Laravel\Eloquent\Model;
+use MongoDB\Laravel\Eloquent\SoftDeletes;
+use MongoDB\Laravel\Relations\BelongsTo;
+use MongoDB\Laravel\Relations\HasMany;
+use MongoDB\Laravel\Relations\MorphOne;
 use Illuminate\Support\Str;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'supplier_id', 'category_id', 'description', 'brand', 'model', 'size', 'collection', 'gender',
@@ -25,6 +26,7 @@ class Product extends Model
         'promo_start_at' => 'datetime', 'promo_end_at' => 'datetime', 'cost_price' => 'decimal:2',
         'sale_price' => 'decimal:2', 'promo_price' => 'decimal:2', 'weight' => 'decimal:3',
         'width' => 'decimal:2', 'height' => 'decimal:2', 'length' => 'decimal:2',
+        'created_at' => 'datetime', 'updated_at' => 'datetime', 'deleted_at' => 'datetime',
     ];
 
     protected $appends = ['current_price', 'seo_display'];
@@ -36,15 +38,33 @@ class Product extends Model
 
     protected static function booted(): void
     {
-        static::creating(function ($product) { if (! $product->slug) { $product->slug = self::generateUniqueSlug($product->description); } });
-        static::updating(function ($product) { if ($product->isDirty('description')) { $product->slug = self::generateUniqueSlug($product->description); } });
-        static::deleting(function ($product) { if ($product->seo) { $product->seo()->delete(); } $product->images()->delete(); });
+        static::creating(function ($product) { 
+            if (! $product->slug) { 
+                $product->slug = self::generateUniqueSlug($product->description); 
+            }
+            if (empty($product->_id)) {
+                $product->_id = (string) new \MongoDB\BSON\ObjectId();
+            }
+        });
+        static::updating(function ($product) { 
+            if ($product->isDirty('description')) { 
+                $product->slug = self::generateUniqueSlug($product->description); 
+            } 
+        });
+        static::deleting(function ($product) { 
+            if ($product->seo) { $product->seo()->delete(); } 
+            $product->images()->delete(); 
+        });
     }
 
     public static function generateUniqueSlug($text): string
     {
-        $baseSlug = Str::slug($text); $slug = $baseSlug; $count = 1;
-        while (self::where('slug', $slug)->exists()) { $slug = $baseSlug.'-'.$count++; }
+        $baseSlug = Str::slug($text); 
+        $slug = $baseSlug; 
+        $count = 1;
+        while (self::where('slug', $slug)->exists()) { 
+            $slug = $baseSlug.'-'.$count++; 
+        }
         return $slug;
     }
 
@@ -73,5 +93,19 @@ class Product extends Model
             'slug' => $this->slug,
             'canonical_url' => config('app.url').'/api/v1/catalog/products/'.$this->slug,
         ];
+    }
+
+    // MongoDB search helper for short queries
+    public function scopeShortSearch($query, $term)
+    {
+        if (strlen($term) < 4) {
+            return $query->where(function ($q) use ($term) {
+                $q->where('barcode', $term)
+                  ->orWhere('model', 'regex', new \MongoDB\BSON\Regex("^{$term}", 'i'))
+                  ->orWhere('brand', 'regex', new \MongoDB\BSON\Regex("^{$term}", 'i'));
+            });
+        }
+        
+        return $query->where('description', 'regex', new \MongoDB\BSON\Regex($term, 'i'));
     }
 }
